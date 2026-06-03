@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+  :root { --bg:#fff;--text:#1a1a2e;--text-secondary:#555770;--accent:#0891b2;--accent-light:#ecfeff;--border:#e2e8f0;--code-bg:#f1f5f9;--card-bg:#f8fafc;--gradient-1:linear-gradient(135deg,#0891b2,#6366f1); }
+  * { margin:0;padding:0;box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);font-size:11pt;line-height:1.7;-webkit-print-color-adjust:exact;print-color-adjust:exact; }
+  @page { margin:20mm 18mm;size:A4; }
+  h1 { font-size:22pt;font-weight:800;letter-spacing:-0.5px;margin:36px 0 12px; }
+  h2 { font-size:16pt;font-weight:700;margin:28px 0 10px;padding-bottom:8px;border-bottom:2px solid var(--accent);display:inline-block; }
+  h3 { font-size:13pt;font-weight:600;margin:20px 0 8px;color:var(--accent); }
+  h4 { font-size:11pt;font-weight:600;margin:14px 0 6px; }
+  p { margin:6px 0; }
+  .section { page-break-inside:avoid;margin-bottom:20px; }
+  table { width:100%;border-collapse:collapse;margin:12px 0 18px;font-size:10pt; }
+  th { background:var(--accent);color:white;padding:8px 12px;text-align:left;font-weight:600;font-size:9.5pt;text-transform:uppercase;letter-spacing:0.5px; }
+  td { padding:7px 12px;border-bottom:1px solid var(--border); }
+  tr:nth-child(even) td { background:var(--card-bg); }
+  code { font-family:'JetBrains Mono',monospace;font-size:9pt;background:var(--code-bg);padding:2px 6px;border-radius:4px; }
+  pre { background:#0f172a;color:#e2e8f0;padding:16px 20px;border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:8.5pt;line-height:1.5;margin:10px 0 16px;white-space:pre-wrap; }
+  .card { background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:12px 0; }
+  .highlight-card { background:linear-gradient(135deg,rgba(8,145,178,0.05),rgba(99,102,241,0.05));border:1px solid rgba(8,145,178,0.2);border-radius:12px;padding:16px 20px;margin:12px 0; }
+  .grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+  .divider { height:1px;background:var(--border);margin:30px 0; }
+  .page-break { page-break-before:always; }
+  ol,ul { margin-left:20px;margin-bottom:12px; }
+  li { margin:4px 0; }
+  .badge { display:inline-block;padding:3px 10px;border-radius:20px;font-size:8.5pt;font-weight:600;margin:2px; }
+  .badge-cyan { background:#ecfeff;color:#0891b2; }
+  .badge-green { background:#f0fdf4;color:#16a34a; }
+  .summary-row td { font-weight:600; }
+  .footer { margin-top:40px;padding-top:20px;border-top:2px solid var(--accent);text-align:center;color:var(--text-secondary);font-size:9pt; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ SECTION 6: DATABASE ═══════════════════ -->
+<div class="section">
+  <h1>6. Database Schema</h1>
+  <table>
+    <tr><th>Table</th><th>Key Fields</th><th>Purpose</th></tr>
+    <tr><td><strong>users</strong></td><td>id, name, email, password_hash, role, monthly_allowance, parent_id</td><td>User accounts (student/parent)</td></tr>
+    <tr><td><strong>expenses</strong></td><td>id, user_id, description, amount, category, store_name, lat, lng, is_anomaly, created_at</td><td>Transaction records</td></tr>
+    <tr><td><strong>budgets</strong></td><td>id, user_id, category, budget_limit, month</td><td>Monthly category budgets</td></tr>
+    <tr><td><strong>stores</strong></td><td>id, name, lat, lng, category, average_price_level, address</td><td>Cached store data from OSM</td></tr>
+    <tr><td><strong>recommendations</strong></td><td>id, user_id, title, description, category, priority, potential_savings</td><td>AI-generated saving tips</td></tr>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════ SECTION 7: API ═══════════════════ -->
+<div class="section">
+  <h1>7. API Endpoints</h1>
+
+  <h3>Authentication</h3>
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+    <tr><td>POST</td><td><code>/api/auth/register</code></td><td>Register new user</td></tr>
+    <tr><td>POST</td><td><code>/api/auth/login</code></td><td>Login and receive JWT</td></tr>
+    <tr><td>GET</td><td><code>/api/auth/me</code></td><td>Get current user info</td></tr>
+  </table>
+
+  <h3>Expenses</h3>
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+    <tr><td>GET</td><td><code>/api/expenses</code></td><td>List expenses (with search/filter)</td></tr>
+    <tr><td>POST</td><td><code>/api/expenses</code></td><td>Create expense (auto-categorised by ML)</td></tr>
+    <tr><td>DELETE</td><td><code>/api/expenses/:id</code></td><td>Delete expense</td></tr>
+    <tr><td>GET</td><td><code>/api/expenses/anomalies</code></td><td>Get flagged anomalous expenses</td></tr>
+  </table>
+
+  <h3>Analytics (ML-Powered)</h3>
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>ML Technique</th></tr>
+    <tr><td>GET</td><td><code>/api/analytics/spending-by-category</code></td><td>Aggregation</td></tr>
+    <tr><td>GET</td><td><code>/api/analytics/spending-over-time</code></td><td>Time series</td></tr>
+    <tr><td>GET</td><td><code>/api/analytics/financial-health-score</code></td><td>Composite scoring</td></tr>
+    <tr><td>GET</td><td><code>/api/analytics/next-month-prediction</code></td><td>Linear Regression</td></tr>
+    <tr><td>GET</td><td><code>/api/analytics/budget-vs-actual</code></td><td>Adherence analysis</td></tr>
+    <tr><td>GET</td><td><code>/api/analytics/smart-budgets</code></td><td><strong>K-Means Clustering</strong></td></tr>
+    <tr><td>GET</td><td><code>/api/analytics/recurring-expenses</code></td><td><strong>Frequency Analysis</strong></td></tr>
+    <tr><td>GET</td><td><code>/api/analytics/savings-goal</code></td><td><strong>Monte Carlo Simulation</strong></td></tr>
+  </table>
+
+  <h3>Stores &amp; Other</h3>
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+    <tr><td>GET</td><td><code>/api/stores/nearby</code></td><td>Find stores via OSM + DB</td></tr>
+    <tr><td>POST</td><td><code>/api/stores/cheaper-alternatives</code></td><td>Find cheaper stores (Haversine)</td></tr>
+    <tr><td>GET/POST</td><td><code>/api/budgets</code></td><td>Manage category budgets</td></tr>
+    <tr><td>GET/PUT</td><td><code>/api/profile</code></td><td>User profile management</td></tr>
+    <tr><td>GET</td><td><code>/api/parent/children</code></td><td>List linked children</td></tr>
+    <tr><td>GET</td><td><code>/api/parent/children/:id/summary</code></td><td>Child financial summary</td></tr>
+  </table>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ═══════════════════ SECTION 8: FRONTEND ═══════════════════ -->
+<div class="section">
+  <h1>8. Frontend Pages &amp; UX</h1>
+  <table>
+    <tr><th>Page</th><th>Route</th><th>Key Features</th></tr>
+    <tr><td><strong>Dashboard</strong></td><td><code>/dashboard</code></td><td>Spending overview, category donut chart, trend sparklines, AI forecast</td></tr>
+    <tr><td><strong>Expenses</strong></td><td><code>/expenses</code></td><td>Add/search/delete expenses, ML auto-categorisation indicator</td></tr>
+    <tr><td><strong>Budget</strong></td><td><code>/budget</code></td><td>Set category budgets, animated gauge visualisations, inline editing</td></tr>
+    <tr><td><strong>Health</strong></td><td><code>/health</code></td><td>Financial health gauge (SVG), breakdown cards, AI tips, confetti easter egg</td></tr>
+    <tr><td><strong>Smart Tips</strong></td><td><code>/recommendations</code></td><td>Tinder-style swipeable AI saving recommendations</td></tr>
+    <tr><td><strong>AI Insights</strong></td><td><code>/insights</code></td><td>Spending persona, smart budgets, recurring detection, savings simulator</td></tr>
+    <tr><td><strong>Stores</strong></td><td><code>/stores</code></td><td>Interactive Leaflet map, radius slider, category filter, cheaper alternatives</td></tr>
+    <tr><td><strong>Profile</strong></td><td><code>/profile</code></td><td>User settings, parent linking, allowance management</td></tr>
+    <tr><td><strong>Parent Dashboard</strong></td><td><code>/parent</code></td><td>Multi-child monitoring, health overview, anomaly alerts</td></tr>
+  </table>
+
+  <h3>Design Philosophy</h3>
+  <ul>
+    <li><strong>Dark-first UI:</strong> #030712 background with layered glass surfaces at rgba(255,255,255, 0.03–0.06)</li>
+    <li><strong>Typography:</strong> Inter with font-feature-settings, antialiased, tight tracking on headings</li>
+    <li><strong>Animations:</strong> Spring-based with [0.22, 1, 0.36, 1] cubic-bezier easing</li>
+    <li><strong>Responsive:</strong> Full mobile support with collapsible sidebar and touch gestures</li>
+  </ul>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════ SECTION 9: SECURITY ═══════════════════ -->
+<div class="section">
+  <h1>9. Security Implementation</h1>
+  <table>
+    <tr><th>Mechanism</th><th>Implementation</th></tr>
+    <tr><td><strong>Authentication</strong></td><td>JWT (JSON Web Tokens) via Flask-JWT-Extended</td></tr>
+    <tr><td><strong>Password Storage</strong></td><td>bcrypt hashing (cost factor 12)</td></tr>
+    <tr><td><strong>Route Protection</strong></td><td><code>@jwt_required()</code> decorator on all API endpoints</td></tr>
+    <tr><td><strong>CORS</strong></td><td>Flask-CORS with configurable allowed origins</td></tr>
+    <tr><td><strong>Input Validation</strong></td><td>Marshmallow schemas + server-side validation</td></tr>
+    <tr><td><strong>Role-Based Access</strong></td><td>Student vs Parent role enforcement at route level</td></tr>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════ SECTION 10: STRUCTURE ═══════════════════ -->
+<div class="section">
+  <h1>10. Project Structure</h1>
+  <pre>student-expense-manager/
+├── start.bat                        # One-click launcher
+├── backend/
+│   ├── run.py                       # Flask entry point
+│   ├── app.py                       # App factory + config
+│   ├── models.py                    # SQLAlchemy models
+│   ├── seed_db.py                   # Database seeder
+│   ├── routes/
+│   │   ├── auth.py                  # Authentication
+│   │   ├── expenses.py              # Expense CRUD + ML
+│   │   ├── analytics.py             # ML-powered analytics
+│   │   ├── stores.py                # Store discovery + OSM
+│   │   ├── budgets.py               # Budget management
+│   │   ├── recommendations.py       # AI recommendations
+│   │   ├── profile.py               # User profile
+│   │   └── parent.py                # Parent dashboard
+│   ├── ml/
+│   │   ├── categorizer.py           # LinearSVC classifier
+│   │   ├── anomaly_detection.py     # Isolation Forest
+│   │   ├── spending_predictor.py    # Linear Regression
+│   │   ├── health_score.py          # Health scorer
+│   │   ├── smart_budget.py          # K-Means ★
+│   │   ├── recurring_detector.py    # Frequency Analysis ★
+│   │   ├── savings_goal.py          # Monte Carlo ★
+│   │   └── recommendation_engine.py # Rule-based engine
+│   └── utils/
+│       ├── store_finder.py          # Cheaper alternatives
+│       └── osm_store_finder.py      # Overpass API client
+├── frontend/
+│   ├── src/
+│   │   ├── App.tsx                  # Routing + splash screen
+│   │   ├── pages/student/           # All student pages
+│   │   ├── pages/parent/            # Parent dashboard
+│   │   ├── components/              # Reusable UI components
+│   │   ├── hooks/                   # React Query hooks
+│   │   ├── api/                     # Axios API layer
+│   │   └── context/                 # Auth context
+│   └── package.json
+└── report/                          # This report
+
+★ = New ML features added</pre>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ═══════════════════ SECTION 11: HOW TO RUN ═══════════════════ -->
+<div class="section">
+  <h1>11. How to Run</h1>
+
+  <h3>Quick Start</h3>
+  <p>Double-click <strong><code>start.bat</code></strong> in the project root. This will:</p>
+  <ol>
+    <li>Start the Flask backend (port 5000)</li>
+    <li>Start the Vite frontend (port 5173)</li>
+  </ol>
+
+  <h3>Default Credentials</h3>
+  <table>
+    <tr><th>Account</th><th>Email</th><th>Password</th></tr>
+    <tr><td>Student 1 (Frugal)</td><td><code>student1@test.com</code></td><td><code>Test@123</code></td></tr>
+    <tr><td>Student 2 (Spender)</td><td><code>student2@test.com</code></td><td><code>Test@123</code></td></tr>
+    <tr><td>Parent</td><td><code>parent@test.com</code></td><td><code>Test@123</code></td></tr>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════ SECTION 12: ML SUMMARY ═══════════════════ -->
+<div class="section">
+  <h1>12. Summary of ML Techniques</h1>
+  <table>
+    <tr><th>#</th><th>Technique</th><th>Algorithm</th><th>Library</th><th>Module</th><th>Purpose</th></tr>
+    <tr><td>1</td><td>Text Classification</td><td>LinearSVC + TF-IDF</td><td>scikit-learn</td><td><code>categorizer.py</code></td><td>Auto-categorise expenses</td></tr>
+    <tr><td>2</td><td>Anomaly Detection</td><td>Isolation Forest</td><td>scikit-learn</td><td><code>anomaly_detection.py</code></td><td>Flag unusual spending</td></tr>
+    <tr><td>3</td><td>Forecasting</td><td>Linear Regression</td><td>scikit-learn</td><td><code>spending_predictor.py</code></td><td>Predict next month spending</td></tr>
+    <tr><td>4</td><td>Clustering</td><td>K-Means</td><td>scikit-learn</td><td><code>smart_budget.py</code></td><td>Spending personas + budgets</td></tr>
+    <tr><td>5</td><td>Pattern Detection</td><td>Frequency + CV</td><td>NumPy</td><td><code>recurring_detector.py</code></td><td>Detect recurring expenses</td></tr>
+    <tr><td>6</td><td>Simulation</td><td>Monte Carlo</td><td>NumPy</td><td><code>savings_goal.py</code></td><td>Savings goal probability</td></tr>
+    <tr><td>7</td><td>Scoring</td><td>Statistical Analysis</td><td>NumPy</td><td><code>health_score.py</code></td><td>Financial health assessment</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<div class="footer">
+  <p><strong>SaverAI v2.0</strong> — AI-Powered Student Expense Management System</p>
+  <p>Report generated April 2026</p>
+</div>
+
+</body>
+</html>

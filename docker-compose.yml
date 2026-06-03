@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount instance directory for sqlite database persistence
+      - ./backend/instance:/app/instance
+      # Mount ML models directory to avoid retraining on container restart
+      - ./backend/ml/models:/app/ml/models
+    environment:
+      - FLASK_ENV=production
+      - JWT_SECRET_KEY=super-secure-production-key-change-me
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

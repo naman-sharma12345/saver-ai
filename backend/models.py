@@ -1,0 +1,166 @@
+"""
+SQLAlchemy models for the Student Expense Manager.
+"""
+
+from datetime import datetime, timezone
+from app import db
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# User
+# ─────────────────────────────────────────────────────────────────────────────
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='student')  # 'student' | 'parent'
+    name = db.Column(db.String(100), nullable=False)
+    monthly_allowance = db.Column(db.Float, default=0.0)
+    parent_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    # Relationships
+    parent = db.relationship('User', remote_side=[id], backref='children')
+    expenses = db.relationship('Expense', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    budgets = db.relationship('Budget', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    recommendations = db.relationship('SavingRecommendation', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'email': self.email,
+            'role': self.role,
+            'name': self.name,
+            'monthly_allowance': self.monthly_allowance,
+            'parent_id': self.parent_id,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Expense
+# ─────────────────────────────────────────────────────────────────────────────
+class Expense(db.Model):
+    __tablename__ = 'expenses'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    amount = db.Column(db.Float, nullable=False)
+    category = db.Column(db.String(50), nullable=False, default='Other')
+    description = db.Column(db.String(255), nullable=True)
+    store_name = db.Column(db.String(120), nullable=True)
+    location_lat = db.Column(db.Float, nullable=True)
+    location_lng = db.Column(db.Float, nullable=True)
+    is_recurring = db.Column(db.Boolean, default=False)
+    is_anomaly = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc),
+                           onupdate=lambda: datetime.now(timezone.utc))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'amount': self.amount,
+            'category': self.category,
+            'description': self.description,
+            'store_name': self.store_name,
+            'location_lat': self.location_lat,
+            'location_lng': self.location_lng,
+            'is_recurring': self.is_recurring,
+            'is_anomaly': self.is_anomaly,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Category
+# ─────────────────────────────────────────────────────────────────────────────
+class Category(db.Model):
+    __tablename__ = 'categories'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    is_custom = db.Column(db.Boolean, default=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'is_custom': self.is_custom,
+        }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Budget
+# ─────────────────────────────────────────────────────────────────────────────
+class Budget(db.Model):
+    __tablename__ = 'budgets'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    category = db.Column(db.String(50), nullable=False)
+    budget_limit = db.Column(db.Float, nullable=False)
+    month = db.Column(db.Date, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'category': self.category,
+            'budget_limit': self.budget_limit,
+            'month': self.month.isoformat() if self.month else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Saving Recommendation
+# ─────────────────────────────────────────────────────────────────────────────
+class SavingRecommendation(db.Model):
+    __tablename__ = 'saving_recommendations'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    recommendation_text = db.Column(db.Text, nullable=False)
+    amount_saved = db.Column(db.Float, default=0.0)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'recommendation_text': self.recommendation_text,
+            'amount_saved': self.amount_saved,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Store
+# ─────────────────────────────────────────────────────────────────────────────
+class Store(db.Model):
+    __tablename__ = 'stores'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    lat = db.Column(db.Float, nullable=False)
+    lng = db.Column(db.Float, nullable=False)
+    address = db.Column(db.String(255), nullable=True)
+    average_price_level = db.Column(db.Integer, default=3)  # 1 (cheapest) – 5 (most expensive)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'category': self.category,
+            'lat': self.lat,
+            'lng': self.lng,
+            'address': self.address,
+            'average_price_level': self.average_price_level,
+        }

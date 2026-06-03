@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+  :root { --bg:#fff;--text:#1a1a2e;--text-secondary:#555770;--accent:#0891b2;--accent-light:#ecfeff;--border:#e2e8f0;--code-bg:#f1f5f9;--card-bg:#f8fafc;--gradient-1:linear-gradient(135deg,#0891b2,#6366f1); }
+  * { margin:0;padding:0;box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);font-size:11pt;line-height:1.7;-webkit-print-color-adjust:exact;print-color-adjust:exact; }
+  @page { margin:20mm 18mm;size:A4; }
+  h1 { font-size:22pt;font-weight:800;letter-spacing:-0.5px;margin:36px 0 12px; }
+  h2 { font-size:16pt;font-weight:700;margin:28px 0 10px;padding-bottom:8px;border-bottom:2px solid var(--accent);display:inline-block; }
+  h3 { font-size:13pt;font-weight:600;margin:20px 0 8px;color:var(--accent); }
+  h4 { font-size:11pt;font-weight:600;margin:14px 0 6px; }
+  p { margin:6px 0; }
+  .section { page-break-inside:avoid;margin-bottom:20px; }
+  table { width:100%;border-collapse:collapse;margin:12px 0 18px;font-size:10pt; }
+  th { background:var(--accent);color:white;padding:8px 12px;text-align:left;font-weight:600;font-size:9.5pt;text-transform:uppercase;letter-spacing:0.5px; }
+  td { padding:7px 12px;border-bottom:1px solid var(--border); }
+  tr:nth-child(even) td { background:var(--card-bg); }
+  code { font-family:'JetBrains Mono',monospace;font-size:9pt;background:var(--code-bg);padding:2px 6px;border-radius:4px; }
+  pre { background:#0f172a;color:#e2e8f0;padding:16px 20px;border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:9pt;line-height:1.6;margin:10px 0 16px;white-space:pre-wrap; }
+  .card { background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:12px 0; }
+  .highlight-card { background:linear-gradient(135deg,rgba(8,145,178,0.05),rgba(99,102,241,0.05));border:1px solid rgba(8,145,178,0.2);border-radius:12px;padding:16px 20px;margin:12px 0; }
+  .grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+  .divider { height:1px;background:var(--border);margin:30px 0; }
+  .page-break { page-break-before:always; }
+  ol,ul { margin-left:20px;margin-bottom:12px; }
+  li { margin:4px 0; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ 4.4 K-Means Smart Budget ═══════════════════ -->
+<div class="section">
+  <h2>4.4 Smart Budget Recommender (K-Means Clustering)</h2>
+  <div class="highlight-card">
+    <div class="grid-2">
+      <div>
+        <p><strong>Module:</strong> <code>ml/smart_budget.py</code></p>
+        <p><strong>Algorithm:</strong> K-Means Clustering</p>
+        <p><strong>Features:</strong> Per-category spending averages (8D)</p>
+      </div>
+      <div>
+        <p><strong>Preprocessing:</strong> StandardScaler normalisation</p>
+        <p><strong>k Selection:</strong> <code>min(max(2, n_users/2), 5)</code></p>
+        <p><strong>n_init:</strong> 10 random restarts</p>
+      </div>
+    </div>
+  </div>
+
+  <h4>Algorithm Flow</h4>
+  <pre>1. Extract category spending profiles for ALL students
+2. Build feature matrix [n_students × 8_categories]
+3. StandardScaler normalisation (zero mean, unit variance)
+4. K-Means clustering with optimal k
+5. Identify user's cluster assignment
+6. Compute cluster-mean spending per category
+7. Apply headroom factor based on spending persona
+8. Cap individual categories at 40% of allowance
+9. Scale total to ≤95% of allowance</pre>
+
+  <h4>Spending Personas</h4>
+  <table>
+    <tr><th>Persona</th><th>Spending Ratio</th><th>Headroom Factor</th></tr>
+    <tr><td>Frugal Saver</td><td>≤ 50%</td><td>1.10× (10% above cluster avg)</td></tr>
+    <tr><td>Balanced Spender</td><td>≤ 75%</td><td>1.05×</td></tr>
+    <tr><td>Active Spender</td><td>≤ 95%</td><td>0.95× (encourage reduction)</td></tr>
+    <tr><td>Over-Spender</td><td>&gt; 95%</td><td>0.85× (aggressive reduction)</td></tr>
+  </table>
+
+  <h4>Fallback (Heuristic — 50/30/20 Rule)</h4>
+  <p>When fewer than 2 users exist (insufficient for clustering), the system uses the <strong>50/30/20 rule</strong> adapted for students:</p>
+  <ul>
+    <li><strong>50% Needs:</strong> Food (25%), Transport (10%), Bills (8%), Health (7%)</li>
+    <li><strong>30% Wants:</strong> Entertainment (15%), Shopping (15%)</li>
+    <li><strong>20% Growth:</strong> Study Materials (12%), Other (8%)</li>
+  </ul>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ═══════════════════ 4.5 Recurring Detector ═══════════════════ -->
+<div class="section">
+  <h2>4.5 Recurring Expense Detector</h2>
+  <div class="highlight-card">
+    <div class="grid-2">
+      <div>
+        <p><strong>Module:</strong> <code>ml/recurring_detector.py</code></p>
+        <p><strong>Technique:</strong> Frequency Analysis + Coefficient of Variation</p>
+      </div>
+      <div>
+        <p><strong>Min Occurrences:</strong> 3 (to detect pattern)</p>
+        <p><strong>Regularity Threshold:</strong> CV-based score ≥ 0.3</p>
+      </div>
+    </div>
+  </div>
+
+  <h4>Algorithm</h4>
+  <pre>1. Group expenses by normalised (description + store_name)
+2. For each group with ≥3 occurrences:
+   a. Sort by date, compute time deltas between consecutive expenses
+   b. Calculate mean_delta, std_delta
+   c. Coefficient of Variation: CV = std / mean
+   d. Time regularity = max(0, 1 - CV_time)
+   e. Amount regularity = max(0, 1 - CV_amount)
+   f. Composite score = 0.7 × time_regularity + 0.3 × amount_regularity
+3. Filter: keep only patterns with score ≥ 0.3
+4. Predict next occurrence: last_date + mean_delta</pre>
+
+  <h4>Frequency Classification</h4>
+  <table>
+    <tr><th>Period (days)</th><th>Label</th></tr>
+    <tr><td>1–3</td><td>Daily</td></tr>
+    <tr><td>5–10</td><td>Weekly</td></tr>
+    <tr><td>12–18</td><td>Bi-weekly</td></tr>
+    <tr><td>25–35</td><td>Monthly</td></tr>
+    <tr><td>55–70</td><td>Bi-monthly</td></tr>
+    <tr><td>80–100</td><td>Quarterly</td></tr>
+  </table>
+
+  <h4>Confidence Levels</h4>
+  <table>
+    <tr><th>Regularity Score</th><th>Confidence</th></tr>
+    <tr><td>≥ 0.8</td><td>High</td></tr>
+    <tr><td>≥ 0.5</td><td>Medium</td></tr>
+    <tr><td>&lt; 0.5</td><td>Low</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════ 4.6 Monte Carlo ═══════════════════ -->
+<div class="section">
+  <h2>4.6 Savings Goal Predictor (Monte Carlo Simulation)</h2>
+  <div class="highlight-card">
+    <div class="grid-2">
+      <div>
+        <p><strong>Module:</strong> <code>ml/savings_goal.py</code></p>
+        <p><strong>Technique:</strong> Monte Carlo Simulation</p>
+      </div>
+      <div>
+        <p><strong>Simulations:</strong> 1,000 iterations</p>
+        <p><strong>Distribution:</strong> Normal (fitted to historical)</p>
+      </div>
+    </div>
+  </div>
+
+  <h4>Algorithm</h4>
+  <pre>1. Fit Normal distribution to historical monthly spending:
+   μ = mean(monthly_totals), σ = std(monthly_totals)
+2. For each of 1000 simulations:
+   a. For each future month:
+      - Sample spending ~ N(μ, σ), clamped to ≥0
+      - monthly_savings = allowance - spending
+      - cumulate
+   b. Record total_savings for this simulation
+3. Probability = count(total_savings ≥ target) / 1000 × 100
+4. Compute percentiles: P10, P25, P50, P75, P90</pre>
+
+  <h4>Probability Interpretation</h4>
+  <table>
+    <tr><th>Probability</th><th>Assessment</th></tr>
+    <tr><td>≥ 90%</td><td>Excellent — current habits strongly support goal</td></tr>
+    <tr><td>≥ 70%</td><td>Good — minor adjustments needed</td></tr>
+    <tr><td>≥ 40%</td><td>Moderate — significant reduction in spending required</td></tr>
+    <tr><td>&lt; 40%</td><td>Challenging — consider extending timeline or reducing target</td></tr>
+  </table>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ═══════════════════ 4.7 Health Score ═══════════════════ -->
+<div class="section">
+  <h2>4.7 Financial Health Score</h2>
+  <div class="highlight-card">
+    <div class="grid-2">
+      <div>
+        <p><strong>Module:</strong> <code>ml/health_score.py</code></p>
+        <p><strong>Technique:</strong> Composite scoring with statistical analysis</p>
+      </div>
+      <div>
+        <p><strong>Score Range:</strong> 0 — 100</p>
+        <p><strong>Components:</strong> Savings (40) + Budget (30) + Discipline (30)</p>
+      </div>
+    </div>
+  </div>
+
+  <h4>Savings Score (0–40)</h4>
+  <table>
+    <tr><th>Spending Ratio</th><th>Score</th><th>Assessment</th></tr>
+    <tr><td>≤ 50%</td><td>40</td><td>Excellent</td></tr>
+    <tr><td>≤ 70%</td><td>32</td><td>Good</td></tr>
+    <tr><td>≤ 85%</td><td>22</td><td>Moderate</td></tr>
+    <tr><td>≤ 100%</td><td>12</td><td>High</td></tr>
+    <tr><td>&gt; 100%</td><td>0</td><td>Over-budget</td></tr>
+  </table>
+
+  <h4>Budget Score (0–30)</h4>
+  <pre>adherence_rate = categories_within_budget / total_categories
+budget_score = adherence_rate × 30</pre>
+
+  <h4>Discipline Score (0–30)</h4>
+  <p>Two sub-components:</p>
+  <ul>
+    <li><strong>Anomaly penalty (0–15):</strong> <code>15 × (1 - anomaly_rate × 5)</code></li>
+    <li><strong>Consistency (0–15):</strong> Based on Coefficient of Variation of monthly spending</li>
+  </ul>
+  <table>
+    <tr><th>CoV</th><th>Score</th><th>Label</th></tr>
+    <tr><td>&lt; 0.2</td><td>15</td><td>Very Consistent</td></tr>
+    <tr><td>&lt; 0.4</td><td>11</td><td>Mostly Consistent</td></tr>
+    <tr><td>&lt; 0.6</td><td>7</td><td>Somewhat Variable</td></tr>
+    <tr><td>≥ 0.6</td><td>3</td><td>Highly Variable</td></tr>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════ SECTION 5: KEY FEATURES ═══════════════════ -->
+<div class="section">
+  <h1>5. Key Features Detail</h1>
+
+  <h3>5.1 OpenStreetMap Store Discovery</h3>
+  <p>The system queries the <strong>Overpass API</strong> to fetch real-world store locations:</p>
+  <ul>
+    <li>Searches within configurable radius (1–25 km)</li>
+    <li>Maps 60+ OSM amenity/shop types to 8 app categories</li>
+    <li>Estimates price levels from OSM tags (cuisine, brand, fees)</li>
+    <li>Caches discovered stores in the database to minimise API calls</li>
+    <li>Graceful fallback to local DB when API is unavailable</li>
+  </ul>
+
+  <h3>5.2 Geospatial Cheaper Alternatives</h3>
+  <p>Uses the <strong>Haversine formula</strong> via GeoPy to:</p>
+  <ol>
+    <li>Find the store associated with an expense</li>
+    <li>Query stores with lower price levels within the radius</li>
+    <li>Calculate estimated savings based on price level differential</li>
+    <li>Rank by distance for practical recommendations</li>
+  </ol>
+
+  <h3>5.3 AI Insights Page (New Feature)</h3>
+  <p>A dedicated insights page that provides deep ML-powered analysis:</p>
+  <ul>
+    <li><strong>Spending Persona:</strong> K-Means cluster assignment with visual persona card</li>
+    <li><strong>Smart Budget Recommendations:</strong> AI-optimised per-category budgets</li>
+    <li><strong>Recurring Expense Detection:</strong> Auto-detected subscription patterns with next occurrence prediction</li>
+    <li><strong>Savings Goal Simulator:</strong> Monte Carlo-powered probability calculator</li>
+  </ul>
+
+  <h3>5.4 Parental Monitoring</h3>
+  <p>Parents can link to student accounts and view:</p>
+  <ul>
+    <li>Per-student spending summaries and category breakdown</li>
+    <li>Financial health scores and budget adherence rates</li>
+    <li>Anomaly alerts for unusual spending patterns</li>
+  </ul>
+</div>
+
+</body>
+</html>

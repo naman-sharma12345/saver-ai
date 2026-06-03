@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a2e;
+    --text-secondary: #555770;
+    --accent: #0891b2;
+    --accent-light: #ecfeff;
+    --border: #e2e8f0;
+    --code-bg: #f1f5f9;
+    --card-bg: #f8fafc;
+    --gradient-1: linear-gradient(135deg, #0891b2, #6366f1);
+    --gradient-2: linear-gradient(135deg, #6366f1, #ec4899);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    font-size: 11pt;
+    line-height: 1.7;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @page { margin: 20mm 18mm; size: A4; }
+
+  /* ─── Cover Page ─── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(8,145,178,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 30%, rgba(99,102,241,0.06) 0%, transparent 50%);
+  }
+  .cover-logo {
+    width: 90px; height: 90px;
+    background: var(--gradient-1);
+    border-radius: 24px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 42px; font-weight: 800;
+    margin-bottom: 32px;
+    box-shadow: 0 20px 60px rgba(8,145,178,0.25);
+    position: relative;
+  }
+  .cover h1 {
+    font-size: 42pt; font-weight: 800; letter-spacing: -1.5px;
+    background: var(--gradient-1);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 8px; position: relative;
+  }
+  .cover h2 {
+    font-size: 14pt; font-weight: 400; color: var(--text-secondary);
+    margin-bottom: 48px; position: relative;
+  }
+  .cover-meta {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 48px;
+    background: var(--card-bg);
+  }
+  .cover-meta p { font-size: 11pt; color: var(--text-secondary); margin: 4px 0; }
+  .cover-meta strong { color: var(--text); }
+
+  /* ─── Typography ─── */
+  h1 { font-size: 22pt; font-weight: 800; letter-spacing: -0.5px; margin: 36px 0 12px; color: var(--text); }
+  h2 { font-size: 16pt; font-weight: 700; letter-spacing: -0.3px; margin: 28px 0 10px; color: var(--text);
+       padding-bottom: 8px; border-bottom: 2px solid var(--accent); display: inline-block; }
+  h3 { font-size: 13pt; font-weight: 600; margin: 20px 0 8px; color: var(--accent); }
+  h4 { font-size: 11pt; font-weight: 600; margin: 14px 0 6px; }
+  p { margin: 6px 0; }
+  .section { page-break-inside: avoid; margin-bottom: 20px; }
+
+  /* ─── Tables ─── */
+  table {
+    width: 100%; border-collapse: collapse; margin: 12px 0 18px;
+    font-size: 10pt;
+  }
+  th {
+    background: var(--accent); color: white;
+    padding: 8px 12px; text-align: left; font-weight: 600; font-size: 9.5pt;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  td { padding: 7px 12px; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: var(--card-bg); }
+  tr:hover td { background: var(--accent-light); }
+
+  /* ─── Code ─── */
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: 9pt;
+    background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+  }
+  pre {
+    background: #0f172a; color: #e2e8f0; padding: 16px 20px;
+    border-radius: 12px; font-family: 'JetBrains Mono', monospace;
+    font-size: 9pt; line-height: 1.6; overflow-x: auto;
+    margin: 10px 0 16px; white-space: pre-wrap;
+  }
+  pre .comment { color: #64748b; }
+  pre .keyword { color: #38bdf8; }
+  pre .string { color: #a78bfa; }
+
+  /* ─── Cards ─── */
+  .card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px; margin: 12px 0;
+  }
+  .highlight-card {
+    background: linear-gradient(135deg, rgba(8,145,178,0.05), rgba(99,102,241,0.05));
+    border: 1px solid rgba(8,145,178,0.2);
+    border-radius: 12px; padding: 16px 20px; margin: 12px 0;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* ─── Architecture ─── */
+  .arch-box {
+    background: #0f172a; color: #e2e8f0; padding: 20px;
+    border-radius: 12px; font-family: 'JetBrains Mono', monospace;
+    font-size: 8.5pt; line-height: 1.5; white-space: pre;
+    overflow-x: auto; margin: 12px 0;
+  }
+
+  /* ─── Badges ─── */
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 8.5pt; font-weight: 600; margin: 2px;
+  }
+  .badge-cyan { background: #ecfeff; color: #0891b2; }
+  .badge-indigo { background: #eef2ff; color: #4f46e5; }
+  .badge-pink { background: #fdf2f8; color: #db2777; }
+  .badge-green { background: #f0fdf4; color: #16a34a; }
+  .badge-amber { background: #fffbeb; color: #d97706; }
+
+  .divider { height: 1px; background: var(--border); margin: 30px 0; }
+  .page-break { page-break-before: always; }
+
+  /* ─── Stat Cards ─── */
+  .stat-card {
+    text-align: center; padding: 20px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--card-bg);
+  }
+  .stat-card .number { font-size: 28pt; font-weight: 800; background: var(--gradient-1);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .stat-card .label { font-size: 9pt; color: var(--text-secondary); text-transform: uppercase;
+    letter-spacing: 1px; font-weight: 600; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ COVER PAGE ═══════════════════ -->
+<div class="cover">
+  <div class="cover-logo">S</div>
+  <h1>SaverAI</h1>
+  <h2>AI-Powered Student Expense Management &amp; Budget Recommendation System</h2>
+  <div class="cover-meta">
+    <p><strong>Course:</strong> AI &amp; Machine Learning Project</p>
+    <p><strong>Date:</strong> April 2026</p>
+    <p><strong>Technology:</strong> React · Flask · scikit-learn · SQLite</p>
+  </div>
+</div>
+
+<!-- ═══════════════════ TABLE OF CONTENTS ═══════════════════ -->
+<div class="section">
+  <h1>Table of Contents</h1>
+  <table>
+    <tr><td><strong>1.</strong></td><td>Project Overview &amp; Core Value Proposition</td></tr>
+    <tr><td><strong>2.</strong></td><td>System Architecture</td></tr>
+    <tr><td><strong>3.</strong></td><td>Technology Stack</td></tr>
+    <tr><td><strong>4.</strong></td><td>Machine Learning Pipeline (7 Techniques)</td></tr>
+    <tr><td><strong>5.</strong></td><td>Key Features Detail</td></tr>
+    <tr><td><strong>6.</strong></td><td>Database Schema</td></tr>
+    <tr><td><strong>7.</strong></td><td>API Endpoints</td></tr>
+    <tr><td><strong>8.</strong></td><td>Frontend Pages &amp; UX</td></tr>
+    <tr><td><strong>9.</strong></td><td>Security Implementation</td></tr>
+    <tr><td><strong>10.</strong></td><td>Project Structure</td></tr>
+    <tr><td><strong>11.</strong></td><td>How to Run</td></tr>
+    <tr><td><strong>12.</strong></td><td>Summary of ML Techniques</td></tr>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════ SECTION 1: OVERVIEW ═══════════════════ -->
+<div class="section">
+  <h1>1. Project Overview</h1>
+  <p><strong>SaverAI</strong> is an AI-powered student expense management platform that helps students track spending, discover savings opportunities, and build healthier financial habits through machine learning-driven insights.</p>
+
+  <p>The system combines <strong>7 distinct ML/statistical techniques</strong> across 6 modules to deliver intelligent expense categorisation, anomaly detection, spending prediction, budget optimisation, recurring pattern detection, and savings goal simulation.</p>
+
+  <div class="grid-3" style="margin-top: 16px;">
+    <div class="stat-card">
+      <div class="number">7</div>
+      <div class="label">ML Techniques</div>
+    </div>
+    <div class="stat-card">
+      <div class="number">99.4%</div>
+      <div class="label">Classification Accuracy</div>
+    </div>
+    <div class="stat-card">
+      <div class="number">20+</div>
+      <div class="label">API Endpoints</div>
+    </div>
+  </div>
+
+  <h3>Core Value Proposition</h3>
+  <table>
+    <tr><th>Feature</th><th>Description</th></tr>
+    <tr><td><strong>Expense Tracking</strong></td><td>Add, categorise, and search expenses with AI auto-categorisation</td></tr>
+    <tr><td><strong>Smart Budgeting</strong></td><td>Set per-category budgets with real-time adherence monitoring</td></tr>
+    <tr><td><strong>Financial Health Score</strong></td><td>Composite 0–100 health metric with actionable breakdown</td></tr>
+    <tr><td><strong>AI Insights</strong></td><td>K-Means clustering, Monte Carlo simulation, pattern detection</td></tr>
+    <tr><td><strong>Store Discovery</strong></td><td>Real-time OpenStreetMap-powered nearby store finder</td></tr>
+    <tr><td><strong>Cheaper Alternatives</strong></td><td>Geospatial analysis to find budget-friendly stores</td></tr>
+    <tr><td><strong>Parental Monitoring</strong></td><td>Parent dashboard to oversee linked student accounts</td></tr>
+  </table>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ═══════════════════ SECTION 2: ARCHITECTURE ═══════════════════ -->
+<div class="section">
+  <h1>2. System Architecture</h1>
+  <p>SaverAI follows a <strong>client–server architecture</strong> with a clear separation between the React frontend and Flask backend. The ML engine operates as a service layer within the backend.</p>
+
+  <div class="arch-box">┌──────────────────────────────────────────────────────────────────┐
+│                      FRONTEND (React + TypeScript)               │
+│  ┌────────┐ ┌────────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────────┐ │
+│  │Dashboard│ │Expenses│ │Budget│ │Health│ │Stores│ │AI Insight│ │
+│  └───┬────┘ └───┬────┘ └──┬───┘ └──┬───┘ └──┬───┘ └────┬─────┘ │
+│      └──────────┴─────────┴────────┴────────┴──────────┘        │
+│                  TanStack React Query (API Layer)                │
+└──────────────────────────────┬───────────────────────────────────┘
+                               │ HTTP/JSON + JWT Authentication
+┌──────────────────────────────┼───────────────────────────────────┐
+│                       BACKEND (Flask)                            │
+│  ┌─────────────┐  ┌────────────────┐  ┌──────────────┐          │
+│  │  Routes/API  │  │   ML Engine    │  │  Utilities   │          │
+│  │  • auth      │  │  • LinearSVC   │  │  • OSM API   │          │
+│  │  • expenses  │  │  • IsolForest  │  │  • StoreFndr │          │
+│  │  • analytics │  │  • LinRegress  │  │  • Haversine │          │
+│  │  • stores    │  │  • K-Means     │  │              │          │
+│  │  • budgets   │  │  • MonteCarlo  │  │              │          │
+│  │  • parent    │  │  • FreqAnalys  │  │              │          │
+│  └──────┬───── ┘  └───────┬────────┘  └──────┬───────┘          │
+│         └─────────────────┼──────────────────┘                   │
+│               SQLAlchemy ORM + SQLite Database                   │
+└──────────────────────────────────────────────────────────────────┘</div>
+</div>
+
+<!-- ═══════════════════ SECTION 3: TECH STACK ═══════════════════ -->
+<div class="section">
+  <h1>3. Technology Stack</h1>
+  <div class="grid-2">
+    <div>
+      <h3>Frontend</h3>
+      <table>
+        <tr><th>Technology</th><th>Version</th></tr>
+        <tr><td>React + TypeScript</td><td>19.x</td></tr>
+        <tr><td>Vite (Build Tool)</td><td>8.x</td></tr>
+        <tr><td>TanStack React Query</td><td>5.x</td></tr>
+        <tr><td>Framer Motion</td><td>12.x</td></tr>
+        <tr><td>React-Leaflet + OSM</td><td>5.x</td></tr>
+        <tr><td>Recharts</td><td>3.x</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Backend</h3>
+      <table>
+        <tr><th>Technology</th><th>Version</th></tr>
+        <tr><td>Flask (Python)</td><td>3.1</td></tr>
+        <tr><td>SQLAlchemy + Migrate</td><td>2.0</td></tr>
+        <tr><td>Flask-JWT-Extended</td><td>4.7</td></tr>
+        <tr><td>scikit-learn</td><td>1.6</td></tr>
+        <tr><td>NumPy / SciPy</td><td>2.x / 1.x</td></tr>
+        <tr><td>GeoPy</td><td>2.4</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ═══════════════════ SECTION 4: ML PIPELINE ═══════════════════ -->
+<div class="section">
+  <h1>4. Machine Learning Pipeline</h1>
+  <p>SaverAI employs <strong>7 distinct ML/statistical techniques</strong> across 6 modules. Each is described below with its algorithm, feature engineering, and evaluation methodology.</p>
+
+  <!-- 4.1 Category Classifier -->
+  <h2>4.1 Expense Category Classifier</h2>
+  <div class="highlight-card">
+    <div class="grid-2">
+      <div>
+        <p><strong>Module:</strong> <code>ml/categorizer.py</code></p>
+        <p><strong>Algorithm:</strong> LinearSVC (Support Vector Classifier)</p>
+        <p><strong>Features:</strong> TF-IDF vectors from descriptions</p>
+      </div>
+      <div>
+        <p><strong>Training:</strong> GridSearchCV, 5-fold CV</p>
+        <p><strong>Classes:</strong> 8 expense categories</p>
+        <p><strong>Accuracy:</strong> <strong style="color:#0891b2">99.42%</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <h4>Feature Engineering Pipeline</h4>
+  <pre>Raw Text → Lowercase → TF-IDF Vectorisation (max_features=5000, ngram_range=(1,2), sublinear_tf=True)</pre>
+
+  <h4>Model Pipeline</h4>
+  <pre>Pipeline([
+    ('tfidf', TfidfVectorizer()),
+    ('clf', OneVsRestClassifier(LinearSVC()))
+])</pre>
+
+  <h4>Hyperparameter Search &amp; Best Parameters</h4>
+  <table>
+    <tr><th>Parameter</th><th>Search Space</th><th>Best Value</th></tr>
+    <tr><td><code>tfidf__max_features</code></td><td>[3000, 5000]</td><td>5000</td></tr>
+    <tr><td><code>tfidf__ngram_range</code></td><td>[(1,1), (1,2)]</td><td>(1, 2)</td></tr>
+    <tr><td><code>tfidf__sublinear_tf</code></td><td>[True, False]</td><td>True</td></tr>
+    <tr><td><code>clf__estimator__C</code></td><td>[0.1, 1.0, 5.0]</td><td>5.0</td></tr>
+  </table>
+
+  <h4>Classification Report</h4>
+  <table>
+    <tr><th>Category</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Support</th></tr>
+    <tr><td>Bills</td><td>1.00</td><td>0.99</td><td>0.99</td><td>88</td></tr>
+    <tr><td>Entertainment</td><td>1.00</td><td>0.99</td><td>0.99</td><td>90</td></tr>
+    <tr><td>Food</td><td>1.00</td><td>1.00</td><td>1.00</td><td>97</td></tr>
+    <tr><td>Health</td><td>1.00</td><td>0.99</td><td>0.99</td><td>89</td></tr>
+    <tr><td>Other</td><td>0.98</td><td>1.00</td><td>0.99</td><td>60</td></tr>
+    <tr><td>Shopping</td><td>0.98</td><td>0.99</td><td>0.98</td><td>91</td></tr>
+    <tr><td>Study Materials</td><td>0.99</td><td>1.00</td><td>0.99</td><td>88</td></tr>
+    <tr><td>Transport</td><td>1.00</td><td>1.00</td><td>1.00</td><td>87</td></tr>
+    <tr style="font-weight:700; background: var(--accent-light);"><td>Weighted Avg</td><td>0.99</td><td>0.99</td><td>0.99</td><td>690</td></tr>
+  </table>
+  <p><strong>Fallback Mechanism:</strong> When the ML model has low confidence, the system falls back to a keyword-based rule engine that maps common words to categories.</p>
+
+  <div class="page-break"></div>
+
+  <!-- 4.2 Anomaly Detection -->
+  <h2>4.2 Anomaly Detection (Unusual Spending)</h2>
+  <div class="highlight-card">
+    <div class="grid-2">
+      <div>
+        <p><strong>Module:</strong> <code>ml/anomaly_detection.py</code></p>
+        <p><strong>Algorithm:</strong> Isolation Forest</p>
+      </div>
+      <div>
+        <p><strong>Features:</strong> Amount, Day-of-Month, Hour-of-Day</p>
+        <p><strong>Contamination:</strong> 10% · <strong>Trees:</strong> 100</p>
+      </div>
+    </div>
+  </div>
+
+  <h4>How It Works</h4>
+  <ol style="margin-left: 20px; margin-bottom: 12px;">
+    <li><strong>Feature extraction:</strong> Each expense → <code>[amount, day_of_month, hour_of_day]</code></li>
+    <li><strong>Normalisation:</strong> Z-score: <code>(X - μ) / σ</code></li>
+    <li><strong>Isolation Forest</strong> recursively partitions feature space; anomalies need fewer splits to isolate</li>
+    <li><strong>Scoring:</strong> <code>decision_function()</code> returns anomaly scores; lower = more anomalous</li>
+    <li><strong>Explanation:</strong> Auto-generates natural language explanations</li>
+  </ol>
+
+  <h4>Why Isolation Forest?</h4>
+  <ul style="margin-left: 20px;">
+    <li>Works well with high-dimensional data and small sample sizes</li>
+    <li>Doesn't assume any distribution shape (unlike Z-score thresholding)</li>
+    <li>Linear time complexity O(n log n) — fast for real-time detection</li>
+    <li>Handles both unusually high AND low spending</li>
+  </ul>
+
+  <!-- 4.3 Spending Predictor -->
+  <h2>4.3 Spending Predictor (Next Month Forecast)</h2>
+  <div class="highlight-card">
+    <div class="grid-2">
+      <div>
+        <p><strong>Module:</strong> <code>ml/spending_predictor.py</code></p>
+        <p><strong>Algorithm:</strong> Linear Regression</p>
+      </div>
+      <div>
+        <p><strong>Features:</strong> Monthly index (time series)</p>
+        <p><strong>Confidence:</strong> 95% CI using residual std error</p>
+      </div>
+    </div>
+  </div>
+  <h4>Model</h4>
+  <pre>y = β₀ + β₁ · month_index + ε
+<span class="comment">Where:</span>
+  y = predicted total spending for next month
+  month_index = sequential integer (0, 1, 2, ... n)
+  ε ~ N(0, σ²)</pre>
+
+  <h4>Trend Classification</h4>
+  <table>
+    <tr><th>Slope (β₁)</th><th>Label</th></tr>
+    <tr><td>&gt; ₹50/month</td><td>Increasing ↑</td></tr>
+    <tr><td>&lt; -₹50/month</td><td>Decreasing ↓</td></tr>
+    <tr><td>Otherwise</td><td>Stable →</td></tr>
+  </table>
+</div>
+
+</body>
+</html>
