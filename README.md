@@ -87,6 +87,3 @@ docker-compose up --build
 - **Postman:** Import the `AI_Expense_Manager.postman_collection.json` file.
 - **Tests:** Run `pytest tests/ -v` inside the backend directory (37+ tests). Run `npm run test` inside the frontend directory for component tests.
 
-## Team & Roles
-*This project was developed by...*
-- **[Name]**: Full Stack AI Development, ML Pipeline Engineering, Frontend Architecture.
