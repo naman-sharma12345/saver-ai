@@ -16,9 +16,9 @@ const compact = (v: number) => (v >= 1000 ? `â‚¹${+(v / 1000).toFixed(1)}k` : `â
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[#111827] border border-white/[0.08] rounded-xl px-4 py-3 shadow-2xl">
-      <p className="text-[11px] text-slate-400 mb-0.5">{monthLabel(label)}</p>
-      <p className="text-sm font-semibold text-white">{formatCurrency(payload[0].value)}</p>
+    <div className="bg-[#fff]/90 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-black/[0.04]">
+      <p className="text-[12px] text-[#6e6e73] mb-0.5">{monthLabel(label)}</p>
+      <p className="text-[15px] font-semibold text-[#1d1d1f] tracking-tight">{formatCurrency(payload[0].value)}</p>
     </div>
   );
 };
@@ -27,39 +27,26 @@ export const SpendingTrend: React.FC<SpendingTrendProps> = ({ data }) => {
   return (
     <div className="w-full h-72">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 5, right: 5, left: -8, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 8, right: 4, left: -4, bottom: 0 }}>
           <defs>
             <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.35} />
-              <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
+              <stop offset="0%" stopColor="#0071e3" stopOpacity={0.14} />
+              <stop offset="100%" stopColor="#0071e3" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
-          <XAxis
-            dataKey="month"
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 11, fill: '#8794ab' }}
-            tickFormatter={monthLabel}
-            dy={8}
-          />
-          <YAxis
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 11, fill: '#8794ab' }}
-            width={52}
-            tickFormatter={compact}
-          />
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(6,182,212,0.2)', strokeWidth: 1 }} />
+          <CartesianGrid stroke="rgba(0,0,0,0.06)" vertical={false} />
+          <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#86868b' }} tickFormatter={monthLabel} dy={10} />
+          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#86868b' }} width={52} tickFormatter={compact} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(0,0,0,0.12)', strokeWidth: 1 }} />
           <Area
             type="monotone"
             dataKey="total"
-            stroke="#22d3ee"
+            stroke="#0071e3"
             strokeWidth={2.5}
             fill="url(#colorSpend)"
-            animationDuration={1500}
+            animationDuration={1200}
             dot={false}
-            activeDot={{ r: 4, fill: '#06b6d4', stroke: '#030712', strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: '#0071e3', stroke: '#ffffff', strokeWidth: 3 }}
           />
         </AreaChart>
       </ResponsiveContainer>
