@@ -1,6 +1,6 @@
-"""POST /api/expenses/import - bring in a bank/UPI statement (CSV).
+"""POST /api/expenses/import - bring in a bank/UPI statement (CSV text or a PDF).
 
-Body: {"csv": "<file text>", "commit": false}
+Body: {"csv": "<file text>"} or {"pdf_base64": "<PDF bytes, base64>"}, plus "commit": false
  - commit false (default): preview only, nothing is saved.
  - commit true: save the new rows. Rows already imported (same date, amount and description) are skipped.
 """
@@ -13,6 +13,7 @@ from app import db
 from models import Expense
 from ml.categorizer import predict_category
 from ml.statement_parser import parse_statement
+from ml.pdf_statement import PdfError, decode_pdf, pdf_to_csv
 
 imports_bp = Blueprint('imports', __name__)
 
@@ -25,8 +26,14 @@ def import_statement():
     user_id = int(get_jwt_identity())
     data = request.get_json(silent=True) or {}
     text = data.get('csv')
+    pdf_b64 = data.get('pdf_base64')
+    if isinstance(pdf_b64, str) and pdf_b64:
+        try:
+            text = pdf_to_csv(decode_pdf(pdf_b64))
+        except PdfError as exc:
+            return jsonify({'error': str(exc)}), 400
     if not isinstance(text, str) or not text.strip():
-        return jsonify({'error': 'csv text is required'}), 400
+        return jsonify({'error': 'csv text or a PDF is required'}), 400
     if len(text) > MAX_CHARS:
         return jsonify({'error': 'That file is too large (1 MB max)'}), 413
 
