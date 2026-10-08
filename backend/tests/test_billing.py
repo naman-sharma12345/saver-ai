@@ -10,7 +10,7 @@ from plans import get_entitlement
 
 
 def _register(client, email):
-    r = client.post('/api/auth/register', json={'email': email, 'password': 'secret123', 'name': 'T'})
+    r = client.post('/api/auth/register', json={'email': email, 'password': 'secret123', 'name': 'T', 'date_of_birth': '2002-05-01', 'accept_terms': True})
     assert r.status_code == 201
     return r.get_json()
 
