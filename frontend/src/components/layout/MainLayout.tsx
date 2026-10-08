@@ -66,7 +66,7 @@ export const MainLayout = () => {
               className={cn(
                 'group flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 relative',
                 isActive
-                  ? 'text-white bg-white/[0.06]'
+                  ? 'text-white bg-gradient-to-r from-cyan-500/15 to-indigo-500/10 ring-1 ring-inset ring-cyan-400/20'
                   : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.03]'
               )}
             >
@@ -74,7 +74,7 @@ export const MainLayout = () => {
               {isActive && (
                 <motion.div
                   layoutId="activeNav"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-cyan-500 rounded-r-full"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-gradient-to-b from-cyan-300 to-blue-500 rounded-r-full shadow-[0_0_12px_rgba(34,211,238,0.7)]"
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
               )}
@@ -109,9 +109,9 @@ export const MainLayout = () => {
   );
 
   return (
-    <div className="min-h-screen flex bg-[#030712]">
+    <div className="min-h-screen flex app-bg">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-[260px] h-screen sticky top-0 border-r border-white/[0.04] bg-[#030712]/80 backdrop-blur-xl z-30 flex-shrink-0">
+      <aside className="hidden lg:flex flex-col w-[260px] h-screen sticky top-0 border-r border-white/[0.06] bg-[#050816]/60 backdrop-blur-2xl z-30 flex-shrink-0">
         <NavContent />
       </aside>
 
