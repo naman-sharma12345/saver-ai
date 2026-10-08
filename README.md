@@ -20,6 +20,7 @@ Indian students run a monthly allowance on UPI. Existing apps show *what* you sp
 SaverAI is built around that moment.
 
 - **Allowance runway.** "You have Rs 12,000 left, about Rs 522 a day for the next 23 days."
+- **Bring your bank in.** Upload a CSV statement, SaverAI categorises every payment locally and skips duplicates.
 - **Goals with a finish date.** "Headphones: on track for 12 Dec. Save Rs 1,012 a month to hit your date."
 - **Coaching, not judging.** Nudges based on your own patterns, flagged unusual spend, cheaper places nearby.
 - **Parents in the loop, students in control.** Parents set the allowance and see a summary. Students keep their own data view.
@@ -140,15 +141,16 @@ Point the Razorpay webhook at `/api/billing/webhook` for `subscription.activated
 
 ## Roadmap
 
-Shipped: Apple-style design system, dark mode, landing page, 7-day trial, paywall and pricing, Razorpay seam, subscription detection, savings goals, DPDP age gate and guardian consent, auth hardening (rate limits, password reset, email verification), tested API and CI.
+Shipped: Apple-style design system, dark mode, landing page, 7-day trial, paywall and pricing, Razorpay seam, subscription detection, savings goals, DPDP age gate and guardian consent, CSV statement import, auth hardening (rate limits, password reset, email verification), tested API and CI.
 
 Next, roughly in order:
 
 - [x] Savings goals with projected finish dates (free for everyone)
 - [x] Auth hardening: rate limiting, password reset, email verification (Supabase swap-in is a documented seam)
 - [x] DPDP consent flow and age gate for under-18 users (needs a lawyer's review before launch)
-- [ ] Money stored as integer paise, user-entered expense dates
-- [ ] UPI / bank statement import (CSV and PDF)
+- [x] User-entered expense dates (backdating)
+- [ ] Money stored as integer paise
+- [x] Bank / UPI statement import (CSV). PDF statements next
 - [ ] Account Aggregator integration for consented bank data
 - [ ] Receipt scanning
 - [ ] "Ask your money": natural-language questions answered by our own query engine, no LLM
