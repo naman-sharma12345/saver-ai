@@ -56,7 +56,7 @@ export const Register = () => {
       <form onSubmit={handleSubmit} className="space-y-3">
         <Input name="name" aria-label="Full name" placeholder="Full name" value={formData.name} onChange={handleChange} required />
         <Input name="email" type="email" aria-label="Email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-        <Input name="password" type="password" aria-label="Password" placeholder="Password" value={formData.password} onChange={handleChange} required />
+        <Input name="password" type="password" aria-label="Password" placeholder="Password (8+ characters)" value={formData.password} onChange={handleChange} required />
 
         <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-black/[0.05] !mt-5">
           {['student', 'parent'].map(role => (
