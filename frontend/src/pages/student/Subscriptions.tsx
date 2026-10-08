@@ -6,6 +6,7 @@ import { formatCurrency } from '../../utils/formatters';
 
 const Inner = () => {
   const { data, isLoading } = useQuery({ queryKey: ['subscriptions'], queryFn: subscriptionsApi.list });
+  const { data: up } = useQuery({ queryKey: ['subscriptions-upcoming'], queryFn: () => subscriptionsApi.upcoming(14) });
   if (isLoading) return <Loader />;
   const subs = data?.subscriptions ?? [];
   const locked = (data as any)?.locked && (data as any)?.count > 0;
@@ -19,6 +20,15 @@ const Inner = () => {
         <p className="display-number text-[44px] mt-1">{formatCurrency(data?.total_monthly ?? 0)}<span className="text-[16px] font-normal text-ink-2"> / month</span></p>
         <p className="text-[14px] text-ink-3 mt-1">{formatCurrency(data?.total_annual ?? 0)} per year</p>
       </div>
+      {up && up.count > 0 && (
+        <div className="glass-card p-6 mt-6">
+          <p className="eyebrow">Due in the next 14 days</p>
+          <p className="text-[20px] font-semibold mt-1">{up.count} charge{up.count === 1 ? '' : 's'} · {formatCurrency(up.total)}</p>
+          {up.items.map((d) => (
+            <p key={d.merchant} className="text-[14px] text-ink-2 mt-1">{d.merchant} · {formatCurrency(d.amount)} · around {new Date(d.due_on).toLocaleDateString()}</p>
+          ))}
+        </div>
+      )}
       {locked ? (
         <div className="mt-6"><Paywall title={`${(data as any).count} recurring charge${(data as any).count === 1 ? '' : 's'} found`} body="Pro shows which ones they are, what each costs per year and when they renew next." /></div>
       ) : subs.length === 0 ? (
