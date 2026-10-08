@@ -84,12 +84,12 @@ export const Expenses = () => {
       {filtered.length === 0 ? (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center text-center py-24">
           <div className="w-14 h-14 rounded-full bg-black/[0.05] flex items-center justify-center mb-6">
-            <Receipt size={24} strokeWidth={1.6} className="text-[#6e6e73]" />
+            <Receipt size={24} strokeWidth={1.6} className="text-ink-2" />
           </div>
-          <p className="text-[21px] font-semibold tracking-[-0.022em] text-[#1d1d1f]">
+          <p className="text-[21px] font-semibold tracking-[-0.022em] text-ink">
             {searchTerm ? 'No matches' : 'No expenses yet'}
           </p>
-          <p className="text-[15px] text-[#6e6e73] mt-2 max-w-xs">
+          <p className="text-[15px] text-ink-2 mt-2 max-w-xs">
             {searchTerm ? 'Try a different word.' : 'Add your first expense and SaverAI will sort it into a category for you.'}
           </p>
         </motion.div>
@@ -97,7 +97,7 @@ export const Expenses = () => {
         <div className="space-y-10">
           {groups.map((g) => (
             <section key={g.label}>
-              <h2 className="text-[13px] font-medium text-[#6e6e73] mb-3 px-1">{g.label}</h2>
+              <h2 className="text-[13px] font-medium text-ink-2 mb-3 px-1">{g.label}</h2>
               <Card className="overflow-hidden !rounded-[20px]">
                 <AnimatePresence initial={false}>
                   {g.items.map((expense: any) => (
@@ -110,20 +110,19 @@ export const Expenses = () => {
                       className="group flex items-center gap-4 px-6 py-4 border-b border-black/[0.06] last:border-b-0 hover:bg-black/[0.02] transition-colors"
                     >
                       <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[15px] font-semibold"
-                        style={{ backgroundColor: 'rgba(0,0,0,0.05)', color: '#1d1d1f' }}
+                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[15px] font-semibold bg-black/[0.06] text-ink"
                       >
                         {expense.category?.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[15px] font-medium text-[#1d1d1f] truncate tracking-[-0.011em]">{expense.description}</p>
-                        <p className="text-[13px] text-[#6e6e73] truncate mt-0.5">{expense.store_name} &middot; {expense.category}</p>
+                        <p className="text-[15px] font-medium text-ink truncate tracking-[-0.011em]">{expense.description}</p>
+                        <p className="text-[13px] text-ink-2 truncate mt-0.5">{expense.store_name} &middot; {expense.category}</p>
                       </div>
-                      <p className="text-[15px] font-medium text-[#1d1d1f] tabular-nums flex-shrink-0">{formatCurrency(expense.amount)}</p>
+                      <p className="text-[15px] font-medium text-ink tabular-nums flex-shrink-0">{formatCurrency(expense.amount)}</p>
                       <button
                         onClick={() => handleDelete(expense.id)}
                         aria-label="Delete expense"
-                        className="p-2 -mr-2 rounded-full text-[#86868b] hover:text-[#d70015] hover:bg-[#ff3b30]/10 transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100 flex-shrink-0"
+                        className="p-2 -mr-2 rounded-full text-ink-3 hover:text-red-400 hover:bg-[#ff3b30]/10 transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100 flex-shrink-0"
                       >
                         <Trash2 size={15} />
                       </button>
@@ -145,7 +144,7 @@ export const Expenses = () => {
 
           <div className="relative">
             <Input label="Category (Optional)" placeholder="Leave blank for AI" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} hint="Powered by ML auto-categorization" />
-            <Sparkles size={14} className="absolute right-3 top-9 text-[#86868b]" />
+            <Sparkles size={14} className="absolute right-3 top-9 text-ink-3" />
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
