@@ -1,50 +1,65 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 
-type Theme = 'dark' | 'light';
+export type ThemePreference = 'light' | 'dark' | 'system';
 
-interface ThemeContextType {
-  theme: Theme;
-  toggleTheme: () => void;
+interface ThemeContextValue {
+  preference: ThemePreference;
+  resolved: 'light' | 'dark';
+  setPreference: (p: ThemePreference) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const STORAGE_KEY = 'saverai-theme';
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Check local storage or system preference
-    const stored = localStorage.getItem('theme') as Theme;
-    if (stored) return stored;
-    
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    return 'dark'; // Default to dark for "absolute peak" noir vibe
-  });
+const systemPrefersDark = () =>
+  typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+
+const readPreference = (): ThemePreference => {
+  try {
+    const v = localStorage.getItem(STORAGE_KEY);
+    if (v === 'light' || v === 'dark' || v === 'system') return v;
+  } catch {
+    /* storage unavailable */
+  }
+  return 'light';
+};
+
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const [preference, setPreferenceState] = useState<ThemePreference>(readPreference);
+  const [systemDark, setSystemDark] = useState<boolean>(systemPrefersDark);
 
   useEffect(() => {
-    const root = window.document.documentElement;
-    
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-    
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+    const mq = window.matchMedia?.('(prefers-color-scheme: dark)');
+    if (!mq) return;
+    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
+  const resolved: 'light' | 'dark' = preference === 'system' ? (systemDark ? 'dark' : 'light') : preference;
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
-}
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle('dark', resolved === 'dark');
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', resolved === 'dark' ? '#000000' : '#f5f5f7');
+  }, [resolved]);
 
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-}
+  const setPreference = useCallback((p: ThemePreference) => {
+    setPreferenceState(p);
+    try {
+      localStorage.setItem(STORAGE_KEY, p);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  return <ThemeContext.Provider value={{ preference, resolved, setPreference }}>{children}</ThemeContext.Provider>;
+};
+
+export const useTheme = () => {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
+  return ctx;
+};
