@@ -40,22 +40,18 @@ export const MainLayout = () => {
 
   const NavContent = () => (
     <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className="px-5 pt-7 pb-8">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <span className="text-white font-bold text-base">S</span>
+      {/* Wordmark */}
+      <div className="px-6 pt-8 pb-10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-[9px] bg-[#1d1d1f] flex items-center justify-center">
+            <span className="text-[#fff] font-semibold text-[13px] tracking-tight">S</span>
           </div>
-          <div>
-            <span className="text-[15px] font-semibold text-white tracking-tight">SaverAI</span>
-            <span className="block text-[10px] text-slate-600 font-medium tracking-widest uppercase">Finance</span>
-          </div>
+          <span className="text-[17px] font-semibold text-[#1d1d1f] tracking-[-0.022em]">SaverAI</span>
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto no-scrollbar">
-        <p className="px-3 mb-2 text-[10px] font-semibold text-slate-600 uppercase tracking-widest">Menu</p>
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -64,45 +60,42 @@ export const MainLayout = () => {
               to={item.path}
               onClick={() => setIsMobileOpen(false)}
               className={cn(
-                'group flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 relative',
-                isActive
-                  ? 'text-white bg-gradient-to-r from-cyan-500/15 to-indigo-500/10 ring-1 ring-inset ring-cyan-400/20'
-                  : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.03]'
+                'group flex items-center gap-3 px-3 h-10 rounded-[10px] text-[14px] font-medium tracking-[-0.011em] transition-colors duration-200 relative',
+                isActive ? 'text-[#1d1d1f]' : 'text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.03]'
               )}
             >
-              {/* Active indicator bar */}
               {isActive && (
                 <motion.div
                   layoutId="activeNav"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-gradient-to-b from-cyan-300 to-blue-500 rounded-r-full shadow-[0_0_12px_rgba(34,211,238,0.7)]"
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className="absolute inset-0 rounded-[10px] bg-black/[0.06]"
+                  transition={{ type: 'spring', stiffness: 500, damping: 40 }}
                 />
               )}
-              <item.icon size={18} className={cn(isActive ? 'text-cyan-400' : 'text-slate-600 group-hover:text-slate-400')} />
-              <span>{item.label}</span>
+              <item.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} className={cn('relative', isActive ? 'text-[#0071e3]' : 'text-[#86868b] group-hover:text-[#515154]')} />
+              <span className="relative">{item.label}</span>
             </NavLink>
           );
         })}
       </nav>
 
-      {/* User section */}
-      <div className="px-3 pb-5 mt-auto space-y-1">
-        <div className="h-px bg-white/[0.04] mx-2 mb-3" />
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+      {/* Account */}
+      <div className="px-3 pb-6 mt-auto">
+        <div className="h-px bg-black/[0.06] mx-3 mb-4" />
+        <div className="flex items-center gap-3 px-3 py-1.5">
+          <div className="w-8 h-8 rounded-full bg-black/[0.07] flex items-center justify-center text-[#1d1d1f] text-[13px] font-semibold flex-shrink-0">
             {user?.name?.charAt(0)}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-medium text-white truncate">{user?.name}</p>
-            <p className="text-[11px] text-slate-600 truncate">{user?.email}</p>
+            <p className="text-[13px] font-medium text-[#1d1d1f] truncate">{user?.name}</p>
+            <p className="text-[12px] text-[#86868b] truncate">{user?.email}</p>
           </div>
         </div>
         <button
           onClick={logout}
-          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-[13px] font-medium text-slate-500 hover:text-red-400 hover:bg-red-500/[0.05] transition-all"
+          className="mt-1 flex items-center gap-3 px-3 h-10 w-full rounded-[10px] text-[14px] font-medium text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.03] transition-colors"
         >
-          <LogOut size={18} />
-          <span>Log out</span>
+          <LogOut size={18} strokeWidth={1.8} className="text-[#86868b]" />
+          <span>Sign out</span>
         </button>
       </div>
     </div>
@@ -111,7 +104,7 @@ export const MainLayout = () => {
   return (
     <div className="min-h-screen flex app-bg">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-[260px] h-screen sticky top-0 border-r border-white/[0.06] bg-[#050816]/60 backdrop-blur-2xl z-30 flex-shrink-0">
+      <aside className="hidden lg:flex flex-col w-[248px] h-screen sticky top-0 border-r border-black/[0.06] bg-[#fff]/70 backdrop-blur-2xl backdrop-saturate-150 z-30 flex-shrink-0">
         <NavContent />
       </aside>
 
@@ -122,7 +115,7 @@ export const MainLayout = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setIsMobileOpen(false)}
           />
         )}
@@ -136,7 +129,7 @@ export const MainLayout = () => {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-            className="fixed inset-y-0 left-0 w-[260px] bg-[#0a0f1a] z-50 lg:hidden border-r border-white/[0.04]"
+            className="fixed inset-y-0 left-0 w-[260px] bg-[#fff] z-50 lg:hidden shadow-2xl"
           >
             <NavContent />
           </motion.aside>
@@ -146,16 +139,16 @@ export const MainLayout = () => {
       {/* Main Area */}
       <main className="flex-1 min-h-screen flex flex-col">
         {/* Mobile header */}
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/[0.04] bg-[#030712]/80 backdrop-blur-xl sticky top-0 z-20">
-          <button onClick={() => setIsMobileOpen(true)} className="p-2 -ml-2 text-slate-400 hover:text-white">
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-black/[0.06] bg-[#fff]/80 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-20">
+          <button onClick={() => setIsMobileOpen(true)} className="p-2 -ml-2 text-[#1d1d1f]">
             <Menu size={22} />
           </button>
-          <span className="text-sm font-semibold text-white tracking-tight">SaverAI</span>
+          <span className="text-[15px] font-semibold text-[#1d1d1f] tracking-tight">SaverAI</span>
           <div className="w-9" />
         </header>
 
         {/* Page content */}
-        <div className="flex-1 px-4 py-6 lg:px-10 lg:py-8 max-w-[1400px] w-full mx-auto">
+        <div className="flex-1 px-5 py-8 lg:px-14 lg:py-14 max-w-[1240px] w-full mx-auto">
           <Outlet />
         </div>
       </main>
