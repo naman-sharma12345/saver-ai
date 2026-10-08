@@ -13,6 +13,7 @@ export const expensesApi = {
     const response = await api.post('/expenses', data);
     return response.data;
   },
+  importStatement: async (csv: string, commit: boolean) => (await api.post('/expenses/import', { csv, commit })).data,
   delete: async (id: number) => {
     const response = await api.delete(`/expenses/${id}`);
     return response.data;

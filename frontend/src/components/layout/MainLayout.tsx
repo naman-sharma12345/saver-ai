@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Repeat,
   Target,
+  Upload,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils/formatters';
@@ -28,6 +29,7 @@ const studentNavItems = [
   { icon: Activity, label: 'Health', path: '/health' },
   { icon: Lightbulb, label: 'Smart Tips', path: '/recommendations' },
   { icon: MapPin, label: 'Stores', path: '/stores' },
+  { icon: Upload, label: 'Import', path: '/import' },
   { icon: Target, label: 'Goals', path: '/goals' },
   { icon: Repeat, label: 'Subscriptions', path: '/subscriptions' },
   { icon: User, label: 'Profile', path: '/profile' },

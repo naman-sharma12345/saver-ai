@@ -9,7 +9,7 @@ DELETE /api/expenses/<id>       – delete
 """
 
 import math
-from datetime import datetime, timezone
+from datetime import date as _date, datetime, timezone
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -32,6 +32,19 @@ def _parse_amount(value):
     if not math.isfinite(amount) or amount <= 0:
         return None
     return amount
+
+
+def _parse_day(value):
+    """Optional user-entered expense date (YYYY-MM-DD, not in the future). Returns (datetime|None, error|None)."""
+    if value in (None, ''):
+        return None, None
+    try:
+        d = _date.fromisoformat(str(value)[:10])
+    except ValueError:
+        return None, 'date must be YYYY-MM-DD'
+    if d > _date.today():
+        return None, 'date cannot be in the future'
+    return datetime(d.year, d.month, d.day, 12, 0, tzinfo=timezone.utc), None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -76,6 +89,10 @@ def create_expense():
             'method': result['method'],
         }
 
+    when, err = _parse_day(data.get('date'))
+    if err:
+        return jsonify({'error': err}), 400
+
     expense = Expense(
         user_id=user_id,
         amount=amount,
@@ -86,6 +103,8 @@ def create_expense():
         location_lng=data.get('location_lng') or data.get('lng'),
         is_recurring=bool(data.get('is_recurring', False)),
     )
+    if when:
+        expense.created_at = when
     db.session.add(expense)
     db.session.commit()
 
@@ -245,6 +264,11 @@ def update_expense(expense_id):
         expense.location_lng = data['location_lng']
     if 'is_recurring' in data:
         expense.is_recurring = bool(data['is_recurring'])
+    if data.get('date'):
+        when, err = _parse_day(data['date'])
+        if err:
+            return jsonify({'error': err}), 400
+        expense.created_at = when
 
     expense.updated_at = datetime.now(timezone.utc)
     db.session.commit()
