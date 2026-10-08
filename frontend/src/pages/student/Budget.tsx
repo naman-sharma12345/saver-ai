@@ -4,19 +4,13 @@ import { useBudgetVsActual, useBudgets, useUpdateBudget } from '../../hooks/useQ
 import { Card } from '../../components/ui/Card';
 import { Loader } from '../../components/ui/Loader';
 import { formatCurrency } from '../../utils/formatters';
-import { AlertCircle, Save, Pencil } from 'lucide-react';
+import { Save, Pencil } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Food: '#22d3ee', Transport: '#6366f1', 'Study Materials': '#f59e0b',
-  Entertainment: '#ec4899', Shopping: '#8b5cf6', Bills: '#f43f5e',
-  Health: '#10b981', Other: '#64748b',
-};
-
 const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 16 },
+  initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0 },
-  transition: { delay, duration: 0.4, ease: [0.22, 1, 0.36, 1] as any },
+  transition: { delay, duration: 0.6, ease: [0.22, 1, 0.36, 1] as any },
 });
 
 export const Budget = () => {
@@ -40,74 +34,76 @@ export const Budget = () => {
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="display-title">Budget</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Track spending against your limits for {currentMonth}.</p>
-      </div>
+  const monthLabel = new Date(`${currentMonth}-01`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  const totalLimit = comparison.reduce((n: number, c: any) => n + (c.budget_limit || 0), 0);
+  const totalActual = comparison.reduce((n: number, c: any) => n + (c.actual || 0), 0);
 
-      <div className="space-y-3">
+  return (
+    <div className="space-y-10">
+      <motion.div {...fadeUp(0)}>
+        <p className="eyebrow">{monthLabel}</p>
+        <h1 className="display-title mt-2">Budget</h1>
+        <p className="text-[17px] text-ink-2 mt-3 tracking-[-0.016em]">
+          <span className="text-ink font-medium">{formatCurrency(totalActual)}</span> spent of {formatCurrency(totalLimit)} planned.
+        </p>
+      </motion.div>
+
+      <Card className="overflow-hidden !rounded-[20px]">
         {comparison.map((item: any, idx: number) => {
           const pct = item.budget_limit > 0 ? Math.min((item.actual / item.budget_limit) * 100, 100) : 0;
           const isOver = item.over_budget;
-          const color = CATEGORY_COLORS[item.category] || '#64748b';
+          const nearLimit = !isOver && pct >= 85;
+          const barColor = isOver ? '#ff3b30' : nearLimit ? '#ff9f0a' : 'var(--color-ink)';
 
           return (
-            <motion.div key={item.category} {...fadeUp(idx * 0.05)}>
-              <Card className={`p-5 ${isOver ? 'border-red-500/20' : ''}`}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-                    <h3 className="text-sm font-semibold text-white">{item.category}</h3>
-                    {isOver && <AlertCircle size={14} className="text-red-400" />}
+            <motion.div key={item.category} {...fadeUp(0.05 + idx * 0.04)} className="px-6 py-5 border-b border-black/[0.06] last:border-b-0">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[16px] font-medium tracking-[-0.011em] text-ink">{item.category}</h3>
+                {editCategory === item.category ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      value={editAmount}
+                      onChange={(e) => setEditAmount(Number(e.target.value))}
+                      className="w-28 h-9 px-3 rounded-lg bg-black/[0.05] text-[14px] text-ink outline-none focus:ring-2 focus:ring-[#0071e3]/40 tabular-nums"
+                      autoFocus
+                    />
+                    <Button size="sm" onClick={handleSave} isLoading={updateMutation.isPending}>
+                      <Save size={13} /> Save
+                    </Button>
                   </div>
-
-                  {editCategory === item.category ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        value={editAmount}
-                        onChange={(e) => setEditAmount(Number(e.target.value))}
-                        className="w-24 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-white outline-none focus:border-cyan-500/40"
-                        autoFocus
-                      />
-                      <Button size="icon" onClick={handleSave} isLoading={updateMutation.isPending}>
-                        <Save size={14} />
-                      </Button>
-                    </div>
-                  ) : (
-                    <button onClick={() => { setEditCategory(item.category); setEditAmount(item.budget_limit); }} className="p-1.5 rounded-lg text-slate-600 hover:text-white hover:bg-white/[0.04] transition-colors">
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <span className={`text-[14px] font-medium tabular-nums ${isOver ? 'text-red-400' : 'text-ink-2'}`}>
+                      {isOver ? `${formatCurrency(Math.abs(item.remaining))} over` : `${formatCurrency(item.remaining)} left`}
+                    </span>
+                    <button
+                      onClick={() => { setEditCategory(item.category); setEditAmount(item.budget_limit); }}
+                      aria-label={`Edit ${item.category} budget`}
+                      className="p-1.5 rounded-full text-ink-3 hover:text-ink hover:bg-black/[0.06] transition-colors"
+                    >
                       <Pencil size={14} />
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
 
-                {/* Bar */}
-                <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden mb-3">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${pct}%` }}
-                    transition={{ duration: 1, delay: 0.2 + idx * 0.05 }}
-                    className="h-full rounded-full"
-                    style={{ backgroundColor: isOver ? '#ef4444' : color }}
-                  />
-                </div>
-
-                {/* Numbers */}
-                <div className="flex justify-between text-[12px]">
-                  <span className="text-slate-500">
-                    <span className="text-white font-medium tabular-nums">{formatCurrency(item.actual)}</span> of {formatCurrency(item.budget_limit)}
-                  </span>
-                  <span className={`font-medium tabular-nums ${isOver ? 'text-red-400' : 'text-emerald-400'}`}>
-                    {isOver ? '-' : ''}{formatCurrency(Math.abs(item.remaining))} {isOver ? 'over' : 'left'}
-                  </span>
-                </div>
-              </Card>
+              <div className="h-1.5 bg-black/[0.07] rounded-full overflow-hidden mt-4">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 1.1, delay: 0.2 + idx * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: barColor }}
+                />
+              </div>
+              <p className="text-[13px] text-ink-2 mt-2.5 tabular-nums">
+                {formatCurrency(item.actual)} of {formatCurrency(item.budget_limit)}
+              </p>
             </motion.div>
           );
         })}
-      </div>
+      </Card>
     </div>
   );
 };
