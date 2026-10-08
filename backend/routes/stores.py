@@ -6,6 +6,7 @@ POST /api/stores/cheaper-alternatives  – find cheaper store alternatives for a
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from plans import require_feature
 from geopy.distance import geodesic
 
 from models import Store, Expense
@@ -84,6 +85,7 @@ def nearby_stores():
 # ─────────────────────────────────────────────────────────────────────────────
 @stores_bp.route('/stores/cheaper-alternatives', methods=['POST'])
 @jwt_required()
+@require_feature('store_alternatives')
 def cheaper_alternatives():
     """
     Find cheaper store alternatives for a given expense.
