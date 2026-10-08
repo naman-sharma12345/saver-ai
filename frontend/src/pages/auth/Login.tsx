@@ -40,11 +40,11 @@ export const Login = () => {
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="text-center mb-10">
-        <div className="w-12 h-12 mx-auto bg-[#1d1d1f] rounded-[14px] flex items-center justify-center mb-8">
-          <span className="text-[#fff] font-semibold text-xl tracking-tight">S</span>
+        <div className="w-12 h-12 mx-auto bg-ink rounded-[14px] flex items-center justify-center mb-8">
+          <span className="text-canvas font-semibold text-xl tracking-tight">S</span>
         </div>
-        <h1 className="text-[34px] leading-[1.1] font-semibold text-[#1d1d1f] tracking-[-0.034em]">Sign in to SaverAI</h1>
-        <p className="text-[#6e6e73] text-[17px] mt-3 tracking-[-0.016em]">Know where your money goes.</p>
+        <h1 className="text-[34px] leading-[1.1] font-semibold text-ink tracking-[-0.034em]">Sign in to SaverAI</h1>
+        <p className="text-ink-2 text-[17px] mt-3 tracking-[-0.016em]">Know where your money goes.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -70,9 +70,9 @@ export const Login = () => {
         </Button>
       </form>
 
-      <p className="text-center mt-8 text-[14px] text-[#6e6e73]">
+      <p className="text-center mt-8 text-[14px] text-ink-2">
         New to SaverAI?{' '}
-        <Link to="/register" className="text-[#0071e3] hover:underline font-medium">
+        <Link to="/register" className="text-accent hover:underline font-medium">
           Create an account
         </Link>
       </p>
