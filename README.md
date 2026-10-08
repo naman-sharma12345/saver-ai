@@ -168,7 +168,7 @@ Next, roughly in order:
 - [x] User-entered expense dates (backdating)
 - [ ] Money stored as integer paise
 - [x] Bank / UPI statement import (CSV and text-based PDF with a transaction table; scanned PDFs are not supported)
-- [ ] Account Aggregator integration for consented bank data
+- [ ] Account Aggregator integration for consented bank data (needs a regulated FIU partner, see [docs/ACCOUNT_AGGREGATOR.md](docs/ACCOUNT_AGGREGATOR.md))
 - [ ] Receipt scanning
 - [x] "Ask your money": plain-English questions answered by our own small intent model, no LLM
 - [~] PostgreSQL by default and one-command deploy (config and compose written, not yet verified against a live PostgreSQL)
