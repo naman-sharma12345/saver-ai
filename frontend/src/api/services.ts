@@ -48,5 +48,6 @@ export const parentApi = {
   getChildSummary: async (childId: number) => {
     const response = await api.get(`/parent/children/${childId}/summary`);
     return response.data;
-  }
+  },
+  remind: async (childId: number, note?: string) => (await api.post(`/parent/children/${childId}/remind`, { note })).data,
 };

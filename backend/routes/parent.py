@@ -10,6 +10,12 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from models import User, Expense
 from utils.decorators import parent_required
+from utils.mailer import send_email
+from utils.ratelimit import rate_limit
+import time
+from datetime import datetime
+from sqlalchemy import func
+from flask import current_app
 
 parent_bp = Blueprint('parent', __name__)
 
@@ -98,3 +104,51 @@ def get_student_expenses(student_id):
         'expenses': [e.to_dict() for e in expenses],
         'total': len(expenses),
     }), 200
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# POST /api/parent/children/<student_id>/remind
+# ─────────────────────────────────────────────────────────────────────────────
+REMIND_COOLDOWN_SECONDS = 6 * 3600
+_last_reminder = {}
+
+
+@parent_bp.route('/parent/children/<int:student_id>/remind', methods=['POST'])
+@jwt_required()
+@parent_required
+@rate_limit('remind', 20, 3600)
+def remind_student(student_id):
+    """Email the linked student a friendly allowance check-in. Body: { "note": "optional, 140 chars" }."""
+    parent_id = int(get_jwt_identity())
+    student = User.query.filter_by(id=student_id, role='student').first()
+    if student is None:
+        return jsonify({'error': 'Student not found'}), 404
+    if student.parent_id != parent_id:
+        return jsonify({'error': 'You are not linked to this student'}), 403
+    if student.consent_status != 'granted':
+        return jsonify({'error': 'This student account is not active yet'}), 409
+
+    note = (request.get_json(silent=True) or {}).get('note') or ''
+    if not isinstance(note, str) or len(note) > 140:
+        return jsonify({'error': 'note must be text up to 140 characters'}), 400
+    note = note.strip()
+
+    key = (parent_id, student_id)
+    now = time.monotonic()
+    wait = REMIND_COOLDOWN_SECONDS - (now - _last_reminder.get(key, -1e12))
+    if wait > 0 and current_app.config.get('RATELIMIT_ENABLED', True):
+        return jsonify({'error': 'You already sent a reminder recently. Try again later.', 'retry_after': int(wait)}), 429
+
+    parent = User.query.get(parent_id)
+    first = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    spent = db.session.query(func.coalesce(func.sum(Expense.amount), 0.0)).filter(
+        Expense.user_id == student.id, Expense.created_at >= first).scalar() or 0.0
+    body = ('Hi %s,\n\n%s sent you a quick check-in on your SaverAI allowance.\n'
+            'This month you have logged Rs %s of your Rs %s allowance.\n' % (
+                student.name, parent.name, format(round(spent), ','), format(round(student.monthly_allowance or 0), ',')))
+    if note:
+        body += '\nTheir note: "%s"\n' % note
+    body += '\nOpen SaverAI to see how many days your money lasts.'
+    send_email(student.email, '%s sent you an allowance check-in' % parent.name, body)
+    _last_reminder[key] = now
+    return jsonify({'message': 'Reminder sent to %s.' % student.name}), 200

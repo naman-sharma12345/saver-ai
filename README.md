@@ -20,6 +20,7 @@ Indian students run a monthly allowance on UPI. Existing apps show *what* you sp
 SaverAI is built around that moment.
 
 - **Allowance runway.** "You have Rs 12,000 left, about Rs 522 a day for the next 23 days."
+- **Parent check-ins.** Parents can send a linked student a friendly allowance reminder by email (one per child every 6 hours, optional note).
 - **Ask your money.** "How much did I spend on food this month?" Answered from your own expenses by a small local model (TF-IDF + logistic regression for intent, rules for dates and categories). Period comparisons are Pro.
 - **Bring your bank in.** Upload a CSV statement, SaverAI categorises every payment locally and skips duplicates.
 - **Goals with a finish date.** "Headphones: on track for 12 Dec. Save Rs 1,012 a month to hit your date."
@@ -70,7 +71,7 @@ Flask API  ->  SQLAlchemy  ->  SQLite (dev) / PostgreSQL (prod)
    |
    +-- ml/          scikit-learn models (categorizer, anomaly, forecast, subscriptions)
    +-- plans.py     plans, trial and entitlement checks (single source of truth)
-   +-- routes/      auth, expenses, budgets, analytics, stores, parent, billing, subscriptions, goals
+   +-- routes/      auth, expenses, budgets, analytics, stores, parent, billing, subscriptions, goals, imports, ask
    +-- APScheduler  daily recommendation job
 ```
 

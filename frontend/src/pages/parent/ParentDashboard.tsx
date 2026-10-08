@@ -8,11 +8,21 @@ import { formatCurrency } from '../../utils/formatters';
 import { Users, Bell, CheckCircle, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { parentApi } from '../../api/services';
 
 export const ParentDashboard = () => {
   const { data: childrenData, isLoading: lC } = useChildren();
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const { data: summary, isLoading: lS } = useChildSummary(selectedChildId || 0);
+  const [note, setNote] = useState('');
+  const [sending, setSending] = useState(false);
+  const sendReminder = async () => {
+    if (!selectedChildId) return;
+    setSending(true);
+    try { const r = await parentApi.remind(selectedChildId, note.trim() || undefined); toast.success(r.message || 'Reminder sent'); setNote(''); }
+    catch (e: any) { toast.error(e?.response?.data?.error || 'Could not send the reminder'); }
+    finally { setSending(false); }
+  };
 
   if (lC) return <Loader />;
 
@@ -108,7 +118,9 @@ export const ParentDashboard = () => {
                   </Card>
                 </div>
 
-                <Button variant="secondary" size="lg" onClick={() => toast.success('Reminder sent!')} className="w-full">
+                <input value={note} maxLength={140} onChange={(e) => setNote(e.target.value)} aria-label="Optional note" placeholder="Add a short note (optional)"
+                  className="w-full h-12 rounded-xl bg-black/[0.04] px-4 text-[15px] text-ink outline-none placeholder:text-ink-3 focus:bg-surface focus:ring-4 focus:ring-[#0071e3]/15" />
+                <Button variant="secondary" size="lg" onClick={sendReminder} isLoading={sending} className="w-full">
                   <Bell size={15} /> Send allowance reminder
                 </Button>
               </motion.div>
