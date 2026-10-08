@@ -167,7 +167,7 @@ Next, roughly in order:
 - [x] DPDP consent flow and age gate for under-18 users (needs a lawyer's review before launch)
 - [x] User-entered expense dates (backdating)
 - [ ] Money stored as integer paise
-- [x] Bank / UPI statement import (CSV). PDF statements next
+- [x] Bank / UPI statement import (CSV and text-based PDF with a transaction table; scanned PDFs are not supported)
 - [ ] Account Aggregator integration for consented bank data
 - [ ] Receipt scanning
 - [x] "Ask your money": plain-English questions answered by our own small intent model, no LLM
