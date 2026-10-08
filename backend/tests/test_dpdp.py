@@ -67,3 +67,16 @@ def test_export_and_delete_account(client):
     assert client.delete('/api/auth/me', json={'password': 'wrong'}, headers=h).status_code == 403
     assert client.delete('/api/auth/me', json={'password': 'secret123'}, headers=h).status_code == 200
     assert client.post('/api/auth/login', json={'email': 'bye@t.com', 'password': 'secret123'}).status_code == 401
+
+
+def test_export_and_delete_include_category_rules(app, client):
+    from models import CategoryRule, User
+    t = _reg(client, 'rules@t.com', date_of_birth=_years_ago(22)).get_json()['access_token']
+    h = {'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json'}
+    e = client.post('/api/expenses', json={'amount': 50, 'description': 'tea', 'store_name': 'Tea Spot'}, headers=h).get_json()['expense']
+    client.put(f"/api/expenses/{e['id']}", json={'category': 'Health'}, headers=h)
+    assert client.get('/api/auth/export', headers=h).get_json()['category_rules'] == [
+        {'id': client.get('/api/category-rules', headers=h).get_json()['rules'][0]['id'], 'merchant': 'tea spot', 'category': 'Health'}]
+    assert client.delete('/api/auth/me', json={'password': 'secret123'}, headers=h).status_code == 200
+    with app.app_context():
+        assert CategoryRule.query.filter_by(merchant_key='tea spot').count() == 0
