@@ -7,6 +7,18 @@ def _day(value):
     return value.date() if isinstance(value, datetime) else value
 
 
+def logging_streak(expenses, today):
+    """Consecutive days with at least one logged expense, ending today (or yesterday, so the
+    streak is not lost before the user has had a chance to log today's spending)."""
+    days = {_day(e.created_at) for e in expenses if e.created_at}
+    cur = today if today in days else today - timedelta(days=1)
+    n = 0
+    while cur in days:
+        n += 1
+        cur -= timedelta(days=1)
+    return n
+
+
 def build_digest(expenses, subscriptions, today=None):
     """Last 7 days (ending today) compared with the 7 days before.
 
@@ -75,4 +87,5 @@ def build_digest(expenses, subscriptions, today=None):
                              'amount': round(biggest.amount, 2), 'category': biggest.category}
                             if biggest else None),
         'upcoming_renewals': upcoming,
+        'logging_streak': logging_streak(expenses, today),
     }
