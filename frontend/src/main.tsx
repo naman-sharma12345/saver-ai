@@ -11,7 +11,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
+      retry: (count: number, error: any) => error?.response?.status !== 402 && count < 1,
       refetchOnWindowFocus: false,
     },
   },
