@@ -14,7 +14,9 @@ services:
       - ./backend/ml/models:/app/ml/models
     environment:
       - FLASK_ENV=production
-      - JWT_SECRET_KEY=super-secure-production-key-change-me
+      # Required: export JWT_SECRET_KEY (or put it in a root .env) before running
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?set JWT_SECRET_KEY}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost}
     restart: unless-stopped
 
   frontend:
