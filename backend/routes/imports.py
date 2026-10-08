@@ -12,6 +12,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from models import Expense
 from ml.categorizer import predict_category
+from ml.category_rules import rule_category
 from ml.statement_parser import parse_statement
 from ml.pdf_statement import PdfError, decode_pdf, pdf_to_csv
 
@@ -50,7 +51,7 @@ def import_statement():
             dupes += 1
             continue
         existing.add(key)
-        r['category'] = predict_category(r['description'], r['store_name'])['category']
+        r['category'] = rule_category(user_id, r['store_name'], r['description']) or predict_category(r['description'], r['store_name'])['category']
         rows.append(r)
 
     if data.get('commit') is True:
