@@ -11,6 +11,7 @@ geopy==2.4.1
 requests==2.32.3
 python-dotenv==1.1.0
 bcrypt==4.3.0
+psycopg2-binary==2.9.10
 marshmallow==3.26.1
 APScheduler==3.11.0
 pytest==8.3.5

@@ -26,7 +26,7 @@ SaverAI is built around that moment.
 - **Goals with a finish date.** "Headphones: on track for 12 Dec. Save Rs 1,012 a month to hit your date."
 - **Coaching, not judging.** Nudges based on your own patterns, flagged unusual spend, cheaper places nearby.
 - **Parents in the loop, students in control.** Parents set the allowance and see a summary. Students keep their own data view.
-- **Private by design.** Your data is yours. Built with India's DPDP Rules 2025 in mind, including parental consent for under-18 users (in progress, see roadmap).
+- **Private by design.** Your data is yours. Built with India's DPDP rules in mind, including a draft parental-consent flow for under-18 users (needs legal review, see release checklist).
 
 ## What SaverAI does
 
@@ -104,12 +104,27 @@ VITE_API_URL=http://localhost:5000/api npm run dev   # http://localhost:5173
 
 Demo logins after seeding: `student1@test.com` (with a linked parent `parent@test.com`), password `Test@123`. Change or delete these before any real deployment.
 
-Docker:
+Docker (PostgreSQL, migrations run on start):
 
 ```bash
 export JWT_SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
+export POSTGRES_PASSWORD=$(python -c "import secrets; print(secrets.token_hex(16))")
 docker compose up --build
 ```
+
+The compose file has not yet been run end to end against a real PostgreSQL in this repo's CI. See the release checklist below before pointing real users at it.
+
+### Release checklist (not done yet)
+
+Merged and tested is not the same as ready for real users. Before launch:
+
+- [ ] Send a real email through SMTP (verification, password reset, guardian consent, parent reminders are only logged until `SMTP_*` is set)
+- [ ] Legal review of the Terms, Privacy page and the under-18 consent flow. The DPDP Rules are being phased in and the email-link consent here is a draft, not settled compliance
+- [ ] Real Razorpay keys, a live webhook, and a test payment end to end
+- [ ] Run the migrations and the app against PostgreSQL and fix anything SQLite hid
+- [ ] Start the daily scheduler in one process only (it runs in every gunicorn worker today)
+- [ ] Rotate the secrets that were committed earlier (old JWT secret and AI key remain in git history)
+- [ ] Change or delete the demo logins
 
 ### Tests
 
@@ -156,7 +171,7 @@ Next, roughly in order:
 - [ ] Account Aggregator integration for consented bank data
 - [ ] Receipt scanning
 - [x] "Ask your money": plain-English questions answered by our own small intent model, no LLM
-- [ ] PostgreSQL by default and one-command deploy
+- [~] PostgreSQL by default and one-command deploy (config and compose written, not yet verified against a live PostgreSQL)
 
 ## Security
 

@@ -16,6 +16,15 @@ load_dotenv(os.path.join(basedir, '.env'))
 DEV_SECRET = 'dev-only-insecure-secret'
 
 
+def database_uri():
+    """DATABASE_URI (or DATABASE_URL, as most hosts name it). Accepts the old postgres:// scheme."""
+    uri = os.getenv('DATABASE_URI') or os.getenv('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'student_expense.db')
+    if uri.startswith('postgres://'):
+        uri = 'postgresql://' + uri[len('postgres://'):]
+    return uri
+
+
 class Config:
     """Base configuration class."""
 
@@ -23,10 +32,7 @@ class Config:
     SECRET_KEY = os.getenv('JWT_SECRET_KEY', DEV_SECRET)
 
     # Database — defaults to SQLite; swap the env var to PostgreSQL for prod
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        'DATABASE_URI',
-        'sqlite:///' + os.path.join(basedir, 'student_expense.db')
-    )
+    SQLALCHEMY_DATABASE_URI = database_uri()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # JWT
