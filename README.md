@@ -186,6 +186,7 @@ Next, roughly in order:
 
 - Passwords hashed with bcrypt, 8 character minimum. JWT access and refresh tokens.
 - Rate limits on login, register and password reset. Reset links are signed, expire in one hour and work once. The forgot-password endpoint never reveals whether an email has an account.
+- Request bodies over 6 MB are rejected, statement import is rate limited, and over-long expense fields return a clear 400 instead of a database error.
 - Production refuses to start without `JWT_SECRET_KEY`.
 - Privacy (India's DPDP Act): date of birth is collected at sign-up. Under-18s cannot use the app until a parent or guardian approves by a signed, 7-day, single-use email link; declining deletes the account. No ads and no marketing tracking. Users can download all their data or delete their account from Profile (`GET /api/auth/export`, `DELETE /api/auth/me`). The in-app Terms and Privacy page is a plain-language draft, not legal advice.
 - Model retraining is limited to `ADMIN_EMAILS`.
