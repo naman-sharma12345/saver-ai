@@ -11,7 +11,7 @@ class TestRegister:
     def test_register_success(self, client):
         r = client.post('/api/auth/register', json={
             'email': 'New.User@Test.com', 'password': 'secret123', 'name': 'New User',
-            'monthly_allowance': 5000,
+            'monthly_allowance': 5000, 'date_of_birth': '2002-05-01', 'accept_terms': True,
         })
         assert r.status_code == 201
         body = r.get_json()
@@ -20,7 +20,7 @@ class TestRegister:
 
     def test_register_duplicate_email(self, client):
         r = client.post('/api/auth/register', json={
-            'email': 'student@test.com', 'password': 'secret123', 'name': 'Dup',
+            'email': 'student@test.com', 'password': 'secret123', 'name': 'Dup', 'date_of_birth': '2002-05-01', 'accept_terms': True,
         })
         assert r.status_code == 409
 
