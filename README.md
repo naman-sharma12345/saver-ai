@@ -122,7 +122,7 @@ Merged and tested is not the same as ready for real users. Before launch:
 - [ ] Legal review of the Terms, Privacy page and the under-18 consent flow. The DPDP Rules are being phased in and the email-link consent here is a draft, not settled compliance
 - [ ] Real Razorpay keys, a live webhook, and a test payment end to end
 - [ ] Run the migrations and the app against PostgreSQL and fix anything SQLite hid
-- [ ] Start the daily scheduler in one process only (it runs in every gunicorn worker today)
+- [x] Daily scheduler starts in one process only (file lock, so gunicorn workers do not each run it)
 - [ ] Rotate the secrets that were committed earlier (old JWT secret and AI key remain in git history)
 - [ ] Change or delete the demo logins
 

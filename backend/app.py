@@ -16,6 +16,10 @@ migrate = Migrate()
 jwt = JWTManager()
 
 
+class _SchedulerSkipped(Exception):
+    pass
+
+
 def create_app(config_name=None):
     """Create and configure the Flask application."""
 
@@ -93,6 +97,10 @@ def create_app(config_name=None):
     # ── APScheduler – daily recommendation generation ────────────────────
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
+        from scheduler_lock import acquire_scheduler_lock
+
+        if not acquire_scheduler_lock():
+            raise _SchedulerSkipped()
 
         scheduler = BackgroundScheduler()
 
@@ -119,6 +127,8 @@ def create_app(config_name=None):
         scheduler.start()
         atexit.register(lambda: scheduler.shutdown(wait=False))
         app.logger.info("✅ APScheduler started — daily recommendations at midnight.")
+    except _SchedulerSkipped:
+        app.logger.info("Scheduler already running in another worker; skipping.")
     except ImportError:
         app.logger.warning(
             "⚠️  APScheduler not installed. Daily recommendation job disabled. "
