@@ -9,12 +9,17 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity,
 )
+import math
+import re
+
 import bcrypt
 
 from app import db
 from models import User
 
 auth_bp = Blueprint('auth', __name__)
+
+EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -23,18 +28,34 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/register', methods=['POST'])
 def register():
     """Register a new student or parent account."""
-    data = request.get_json()
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({'error': 'JSON request body is required'}), 400
 
-    # ── Validate required fields ─────────────────────────────────────────
+    # ── Validate required fields ─────────────────────────────────────
     required = ['email', 'password', 'name']
     missing = [f for f in required if f not in data or not data[f]]
     if missing:
         return jsonify({'error': f"Missing required fields: {', '.join(missing)}"}), 400
 
+    if not all(isinstance(data[f], str) for f in required):
+        return jsonify({'error': 'email, password and name must be strings'}), 400
+
     email = data['email'].strip().lower()
     password = data['password']
     name = data['name'].strip()
-    role = data.get('role', 'student').strip().lower()
+    role = str(data.get('role', 'student')).strip().lower()
+
+    if not EMAIL_RE.match(email) or len(email) > 120:
+        return jsonify({'error': 'A valid email address is required'}), 400
+
+    if not name or len(name) > 100:
+        return jsonify({'error': 'Name must be 1-100 characters'}), 400
+
+    allowance = data.get('monthly_allowance', 0.0)
+    if isinstance(allowance, bool) or not isinstance(allowance, (int, float)) \
+            or not math.isfinite(allowance) or allowance < 0:
+        return jsonify({'error': 'monthly_allowance must be a non-negative number'}), 400
 
     if role not in ('student', 'parent'):
         return jsonify({'error': "Role must be 'student' or 'parent'"}), 400
@@ -54,7 +75,7 @@ def register():
         password_hash=password_hash,
         role=role,
         name=name,
-        monthly_allowance=data.get('monthly_allowance', 0.0),
+        monthly_allowance=float(allowance),
     )
     db.session.add(user)
     db.session.commit()
@@ -77,9 +98,10 @@ def register():
 @auth_bp.route('/login', methods=['POST'])
 def login():
     """Authenticate user and return JWT tokens."""
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
-    if not data or not data.get('email') or not data.get('password'):
+    if (not isinstance(data, dict) or not data.get('email') or not data.get('password')
+            or not isinstance(data['email'], str) or not isinstance(data['password'], str)):
         return jsonify({'error': 'Email and password are required'}), 400
 
     email = data['email'].strip().lower()
