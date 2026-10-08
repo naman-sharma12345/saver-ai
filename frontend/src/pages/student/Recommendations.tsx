@@ -5,9 +5,16 @@ import { Card } from '../../components/ui/Card';
 import { Loader } from '../../components/ui/Loader';
 import { formatCurrency } from '../../utils/formatters';
 import { Lightbulb, Check, X, Sparkles } from 'lucide-react';
+import { FeatureGate } from '../../components/billing/Paywall';
 import toast from 'react-hot-toast';
 
-export const Recommendations = () => {
+export const Recommendations = () => (
+  <FeatureGate feature="ai_insights" title="Smart Tips are part of Pro" body="Personalised saving tips from SaverAI's own machine learning models. Start Pro to unlock them.">
+    <RecommendationsInner />
+  </FeatureGate>
+);
+
+const RecommendationsInner = () => {
   const { data, isLoading } = useRecommendations();
   const [index, setIndex] = useState(0);
   const [exitX, setExitX] = useState(0);
