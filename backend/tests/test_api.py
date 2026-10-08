@@ -118,3 +118,14 @@ class TestAccessControl:
     def test_student_cannot_retrain_model(self, client, auth_headers):
         r = client.post('/api/ml/retrain-category', headers=_json(auth_headers))
         assert r.status_code == 403
+
+    def test_parent_is_not_admin_by_default(self, client, parent_headers):
+        r = client.post('/api/ml/retrain-category', headers=_json(parent_headers))
+        assert r.status_code == 403
+
+    def test_only_listed_admin_can_retrain(self, app, client, auth_headers, parent_headers, monkeypatch):
+        monkeypatch.setitem(app.config, 'ADMIN_EMAILS', ['parent@test.com'])
+        monkeypatch.setattr('ml.train_category_model.train_model', lambda: object())
+        monkeypatch.setattr('ml.categorizer.reload_model', lambda: None)
+        assert client.post('/api/ml/retrain-category', headers=_json(auth_headers)).status_code == 403
+        assert client.post('/api/ml/retrain-category', headers=_json(parent_headers)).status_code == 200
