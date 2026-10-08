@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Lazy loaded pages
+const Landing = React.lazy(() => import('./pages/Landing').then(m => ({ default: m.Landing })));
 const Login = React.lazy(() => import('./pages/auth/Login').then(m => ({ default: m.Login })));
 const Register = React.lazy(() => import('./pages/auth/Register').then(m => ({ default: m.Register })));
 const Dashboard = React.lazy(() => import('./pages/student/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -104,7 +105,7 @@ function App() {
         {!showSplash && (
           <Suspense fallback={<Loader fullScreen />}>
             <Routes>
-              <Route path="/" element={<RootRedirect />} />
+              <Route path="/" element={<Landing />} />
               <Route element={<AuthLayout />}>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
