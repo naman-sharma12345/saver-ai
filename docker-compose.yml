@@ -1,22 +1,40 @@
-version: '3.8'
-
 services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: saverai
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: saverai
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saverai -d saverai"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "5000:5000"
     volumes:
-      # Mount instance directory for sqlite database persistence
-      - ./backend/instance:/app/instance
-      # Mount ML models directory to avoid retraining on container restart
+      # Keep trained ML models between restarts
       - ./backend/ml/models:/app/ml/models
     environment:
       - FLASK_ENV=production
-      # Required: export JWT_SECRET_KEY (or put it in a root .env) before running
+      # Required: export these (or put them in a root .env) before running
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:?set JWT_SECRET_KEY}
+      - DATABASE_URI=postgresql://saverai:${POSTGRES_PASSWORD}@db:5432/saverai
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+    # Apply database migrations, then serve
+    command: sh -c "flask db upgrade && gunicorn --bind 0.0.0.0:5000 --workers 2 run:app"
     restart: unless-stopped
 
   frontend:
@@ -28,3 +46,6 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+
+volumes:
+  pgdata:
