@@ -1,89 +1,170 @@
-# SaverAI - Student Expense Management & Budget Recommendation System
+<div align="center">
 
-## Overview
-SaverAI is an absolute peak, production-grade, AI-driven financial backend and sleek frontend built for students and their parents. It is designed to act as an intelligent companion that tracks expenses, enforces budgets, detects anomalous spending, and provides real-time, store-specific saving recommendations.
+# SaverAI
 
-## Features
-- **Auto-Categorization:** ML pipeline (TF-IDF + LinearSVC) automatically categorizes incoming expenses with probability calibration.
-- **Financial Health Score:** A 0-100 composite score built from Savings Ratio, Budget Adherence, and Spending Discipline (Anomaly Frequency and Coefficient of Variation).
-- **Spending Prediction:** Linear regression engine utilizing historical monthly spending to predict future trends with 95% confidence intervals.
-- **Store Optimization:** Uses `geopy` to identify nearby cheaper store alternatives for past expenses to project potential savings.
-- **Anomaly Detection:** `IsolationForest` detects unusual expenses based on timing and amount, alerting both the student and parent.
-- **Parental Oversight:** Read-only parent dashboard to monitor linked children, view their financial health, and send allowance reminders.
-- **Modern PWA Frontend:** Built with React, Vite, TailwindCSS (v4), Framer Motion, and Recharts. Includes glassmorphism design, dark/light mode, and mobile optimization.
+**Know where your money goes. Before it's gone.**
 
-## High-Level Architecture
+The money app for students and the parents who fund them.
+Track spending, see how many days your allowance really lasts, and get coached by machine learning that runs on our own servers. No LLMs, no third-party model APIs, no per-user AI bill.
 
-```mermaid
-graph TD
-    %% Frontend Layer
-    subgraph Frontend [SaverAI React App]
-        A[React UI] -->|Axios/React Query| B[API Interceptor]
-        B -->|JWT Token| C[Backend Router]
-        D[Vite PWA] --> A
-    end
+[Features](#what-saverai-does) · [How the AI works](#the-ai-is-ours) · [Plans](#plans) · [Quick start](#quick-start) · [Configuration](#configuration) · [Roadmap](#roadmap)
 
-    %% Backend Layer
-    subgraph Backend [Flask API]
-        C -->|CRUD| E[PostgreSQL/SQLite]
-        
-        %% ML Pipeline Modules
-        C --> F[Category Predictor]
-        F -->|Loads| M1(SVC Model)
-        
-        C --> G[Anomaly Detector]
-        G -->|Trains| M2(Isolation Forest)
-        
-        C --> H[Health Score Engine]
-        C --> I[Spending Predictor]
-        C --> J[Recommendation Engine]
-        
-        %% External Utilities
-        C --> K[Store Optimizer]
-        K -->|Calculates Distance| L[Geopy]
-    end
+</div>
 
-    %% Background Jobs
-    subgraph Jobs [Cron]
-        N[APScheduler] -->|Triggers Midnight| J
-    end
+---
+
+## Why SaverAI
+
+Indian students run a monthly allowance on UPI. Existing apps show *what* you spent in pie charts. They do not tell you the one thing that matters on the 12th of the month: **how many days your money lasts and what is about to go wrong.**
+
+SaverAI is built around that moment.
+
+- **Allowance runway.** "You have Rs 12,000 left, about Rs 522 a day for the next 23 days."
+- **Coaching, not judging.** Nudges based on your own patterns, flagged unusual spend, cheaper places nearby.
+- **Parents in the loop, students in control.** Parents set the allowance and see a summary. Students keep their own data view.
+- **Private by design.** Your data is yours. Built with India's DPDP Rules 2025 in mind, including parental consent for under-18 users (in progress, see roadmap).
+
+## What SaverAI does
+
+| | Free | Pro |
+|---|:-:|:-:|
+| Expense tracking with ML auto-categorization | ✅ | ✅ |
+| Budgets with over-budget alerts | ✅ | ✅ |
+| Allowance runway (what you can spend per day) | ✅ | ✅ |
+| Financial health score (0-100) | ✅ | ✅ |
+| Unusual spending alerts (anomaly detection) | ✅ | ✅ |
+| Smart tips | 1 a day | All |
+| Subscription finder | Count and monthly cost | Which ones, yearly cost, next renewal |
+| Spending forecast | This month's run rate | Next-month ML forecast with confidence range |
+| Cheaper nearby store finder | | ✅ |
+| Parent link and allowance view | | ✅ |
+| Light, Dark and Auto themes | ✅ | ✅ |
+
+Every new account gets a **7-day Pro trial, no card needed**. Prices are placeholders to be validated with real users (Rs 79 a month or Rs 599 a year, set in `frontend/src/config/plans.ts` and `backend/plans.py`).
+
+## The AI is ours
+
+Everything marked "AI" runs locally with classical machine learning. There is no LLM and no external model API key anywhere in this repo.
+
+| Feature | Technique |
+|---|---|
+| Expense auto-categorization | TF-IDF + calibrated LinearSVC, keyword fallback |
+| Unusual spending | Isolation Forest on amount and timing |
+| Financial health score | Composite of savings ratio, budget adherence and spending discipline |
+| Spending forecast | Regression on monthly history with 95% confidence intervals |
+| Subscription detection | Logistic regression over gap regularity, amount stability and cycle fit (weekly, monthly, yearly), trained in-process on synthetic patterns with a fixed seed |
+| Cheaper stores | Geodesic distance plus price-level model over a store table |
+
+Why this matters for a startup: zero marginal AI cost per user, no data leaves our servers for inference, and the models are ours to improve.
+
+## Architecture
+
+```
+React 19 + Vite + TypeScript + Tailwind v4 (PWA)
+        |  JWT over HTTPS, React Query
+        v
+Flask API  ->  SQLAlchemy  ->  SQLite (dev) / PostgreSQL (prod)
+   |
+   +-- ml/          scikit-learn models (categorizer, anomaly, forecast, subscriptions)
+   +-- plans.py     plans, trial and entitlement checks (single source of truth)
+   +-- routes/      auth, expenses, budgets, analytics, stores, parent, billing, subscriptions
+   +-- APScheduler  daily recommendation job
 ```
 
-## Setup & Execution (Without Docker)
+Billing is behind clean seams:
 
-1. **Backend:**
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/Scripts/activate # Windows
-   pip install -r requirements.txt
-   
-   # Initialize and seed database (Also trains ML models!)
-   flask db upgrade
-   python seed_db.py
-   
-   # Run server
-   python run.py
-   ```
+- **Mock mode** (default): no keys needed. Checkout simulates an upgrade so the whole paywall flow works in development. Disabled in production.
+- **Live mode**: set the Razorpay variables and checkout creates real subscriptions (UPI Autopay, cards, eMandate). A signed webhook (`POST /api/billing/webhook`, HMAC-SHA256) activates and renews Pro.
 
-2. **Frontend:**
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
+## Quick start
 
-## Setup & Execution (With Docker)
-
-To run the entire application stack using Docker Compose:
+Requirements: Python 3.11+, Node 20+.
 
 ```bash
-docker-compose up --build
+git clone https://github.com/naman-sharma12345/saver-ai.git
+cd saver-ai
+
+# Backend
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env            # set JWT_SECRET_KEY at minimum
+python seed_db.py               # demo data and trains the categorizer
+python run.py                   # http://localhost:5000
+
+# Frontend (new terminal)
+cd frontend
+npm ci --legacy-peer-deps
+VITE_API_URL=http://localhost:5000/api npm run dev   # http://localhost:5173
 ```
-- Frontend will be accessible at `http://localhost:80`
-- Backend API will be accessible at `http://localhost:5000`
 
-## Documentation & Testing
-- **Postman:** Import the `AI_Expense_Manager.postman_collection.json` file.
-- **Tests:** Run `pytest tests/ -v` inside the backend directory (37+ tests). Run `npm run test` inside the frontend directory for component tests.
+Demo logins after seeding: `student1@test.com` (with a linked parent `parent@test.com`), password `Test@123`. Change or delete these before any real deployment.
 
+Docker:
+
+```bash
+export JWT_SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
+docker compose up --build
+```
+
+### Tests
+
+```bash
+cd backend && pytest -q           # API, ML, billing and entitlement tests
+cd frontend && npm test && npm run build
+```
+
+CI runs both on every push and pull request.
+
+## Configuration
+
+All settings are environment variables (see `backend/.env.example`).
+
+| Variable | Purpose |
+|---|---|
+| `JWT_SECRET_KEY` | Required in production |
+| `DATABASE_URI` | SQLite by default, use PostgreSQL in production |
+| `CORS_ORIGINS` | Allowed frontend origins |
+| `ADMIN_EMAILS` | Who may retrain the ML model |
+| `TRIAL_DAYS` | Free trial length, default 7 |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Enable live billing |
+| `RAZORPAY_WEBHOOK_SECRET` | Verify Razorpay webhooks |
+| `RAZORPAY_PLAN_ID_MONTHLY`, `RAZORPAY_PLAN_ID_YEARLY` | Plans created in the Razorpay dashboard |
+
+Point the Razorpay webhook at `/api/billing/webhook` for `subscription.activated`, `subscription.charged`, `subscription.cancelled`, `subscription.halted`, `subscription.completed`.
+
+## Roadmap
+
+Shipped: Apple-style design system, dark mode, landing page, 7-day trial, paywall and pricing, Razorpay seam, subscription detection, tested API and CI.
+
+Next, roughly in order:
+
+- [ ] Savings goals with projected finish dates
+- [ ] Auth hardening: rate limiting, email verification, password reset, Supabase-ready seam
+- [ ] DPDP consent flow and age gate for under-18 users
+- [ ] Money stored as integer paise, user-entered expense dates
+- [ ] UPI / bank statement import (CSV and PDF)
+- [ ] Account Aggregator integration for consented bank data
+- [ ] Receipt scanning
+- [ ] "Ask your money": natural-language questions answered by our own query engine, no LLM
+- [ ] PostgreSQL by default and one-command deploy
+
+## Security
+
+- Passwords hashed with bcrypt. JWT access and refresh tokens.
+- Production refuses to start without `JWT_SECRET_KEY`.
+- Model retraining is limited to `ADMIN_EMAILS`.
+- Webhooks are accepted only with a valid HMAC signature.
+- Found a vulnerability? Please open a private security advisory on GitHub instead of a public issue.
+
+## Research
+
+The market, competitor and monetization research behind these choices is summarised in the project history. Highlights: UPI handles 24 billion transactions a month, Jar reached profitability by moving money rather than charging for tracking, and the median freemium app converts about 2 percent, which is why the free tier here is a real product and not a demo.
+
+## Contributing
+
+Branch from `main`, keep PRs small, run the tests above, and update this README when behaviour changes.
+
+## License
+
+All rights reserved for now. A license will be added before any public release.
