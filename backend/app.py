@@ -28,11 +28,16 @@ def create_app(config_name=None):
     from config import config_by_name
     app.config.from_object(config_by_name.get(config_name, config_by_name['development']))
 
+    # Fail fast: never run production with the insecure development secret
+    from config import DEV_SECRET
+    if config_name == 'production' and app.config.get('JWT_SECRET_KEY') == DEV_SECRET:
+        raise RuntimeError('JWT_SECRET_KEY must be set in the environment when FLASK_ENV=production.')
+
     # Initialise extensions
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}})
 
     # ── Import models so Alembic / migrate can detect them ───────────────
     with app.app_context():
