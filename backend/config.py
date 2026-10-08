@@ -56,6 +56,23 @@ class Config:
 
     # All "AI" in SaverAI is local machine learning (scikit-learn). No LLM or model API keys.
 
+    # Auth hardening
+    RATELIMIT_ENABLED = os.getenv('RATELIMIT_ENABLED', '1') == '1'
+    TRUST_PROXY = os.getenv('TRUST_PROXY', '0') == '1'
+    FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+    # Email (leave SMTP_HOST empty to only log emails in development)
+    SMTP_HOST = os.getenv('SMTP_HOST', '')
+    SMTP_PORT = os.getenv('SMTP_PORT', '587')
+    SMTP_USER = os.getenv('SMTP_USER', '')
+    SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')
+    MAIL_FROM = os.getenv('MAIL_FROM', '')
+    # Return reset/verify tokens in API responses. Development and tests only.
+    EXPOSE_AUTH_TOKENS = False
+    # TODO(supabase): when moving auth/db to Supabase, set these and swap routes/auth.py
+    SUPABASE_URL = os.getenv('SUPABASE_URL', '')
+    SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY', '')
+    SUPABASE_JWT_SECRET = os.getenv('SUPABASE_JWT_SECRET', '')
+
     # Billing. With no Razorpay keys the app runs in mock mode (no real charges).
     TRIAL_DAYS = int(os.getenv('TRIAL_DAYS', '7'))
     RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
@@ -68,6 +85,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
+    EXPOSE_AUTH_TOKENS = True
 
 
 class ProductionConfig(Config):
@@ -79,6 +97,8 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
+    EXPOSE_AUTH_TOKENS = True
+    RATELIMIT_ENABLED = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 
