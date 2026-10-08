@@ -22,6 +22,18 @@ from ml.anomaly_detection import detect_anomalies, flag_anomalies_in_db
 expenses_bp = Blueprint('expenses', __name__)
 
 
+MAX_LEN = {'description': 255, 'store_name': 120, 'category': 50}
+
+
+def _too_long(data):
+    """Name of the first text field longer than its column allows, else None."""
+    for field, limit in MAX_LEN.items():
+        v = data.get(field)
+        if isinstance(v, str) and len(v.strip()) > limit:
+            return field
+    return None
+
+
 def _parse_amount(value):
     """Return a positive finite float, or None if the value is not valid."""
     if isinstance(value, bool):
@@ -70,6 +82,10 @@ def create_expense():
     missing = [f for f in required if f not in data or data[f] is None]
     if missing:
         return jsonify({'error': f"Missing required fields: {', '.join(missing)}"}), 400
+
+    long_field = _too_long(data)
+    if long_field:
+        return jsonify({'error': f'{long_field} is too long (max {MAX_LEN[long_field]} characters)'}), 400
 
     amount = _parse_amount(data['amount'])
     if amount is None:
@@ -251,6 +267,10 @@ def update_expense(expense_id):
     data = request.get_json(silent=True)
     if not data:
         return jsonify({'error': 'Request body is required'}), 400
+
+    long_field = _too_long(data)
+    if long_field:
+        return jsonify({'error': f'{long_field} is too long (max {MAX_LEN[long_field]} characters)'}), 400
 
     if 'amount' in data:
         amount = _parse_amount(data['amount'])
