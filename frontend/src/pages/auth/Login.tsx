@@ -64,6 +64,9 @@ export const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+        <div className="text-right -mt-1">
+          <Link to="/forgot-password" className="text-[13px] text-accent hover:underline">Forgot password?</Link>
+        </div>
         <Button type="submit" size="lg" className="w-full !mt-6" isLoading={isLoading}>
           Continue
           <ArrowRight size={16} />
