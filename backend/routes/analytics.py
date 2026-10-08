@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from plans import require_feature
 from sqlalchemy import func
 
 from app import db
@@ -193,6 +194,7 @@ def financial_health_score():
 # ─────────────────────────────────────────────────────────────────────────────
 @analytics_bp.route('/analytics/next-month-prediction', methods=['GET'])
 @jwt_required()
+@require_feature('forecast')
 def next_month_prediction():
     """
     Predict total spending for next month using linear regression
