@@ -20,7 +20,7 @@ export const HealthGauge: React.FC<HealthGaugeProps> = ({ score }) => {
     requestAnimationFrame(animate);
   }, [score]);
 
-  const color = animatedScore >= 80 ? '#10b981' : animatedScore >= 50 ? '#f59e0b' : '#ef4444';
+  const color = animatedScore >= 80 ? '#30a14e' : animatedScore >= 50 ? '#ff9f0a' : '#ff3b30';
   const circumference = 2 * Math.PI * 54; // radius = 54
   const dashOffset = circumference - (animatedScore / 100) * circumference * 0.75; // 270 degree arc
 
@@ -32,8 +32,8 @@ export const HealthGauge: React.FC<HealthGaugeProps> = ({ score }) => {
           <circle
             cx="60" cy="60" r="54"
             fill="none"
-            stroke="rgba(255,255,255,0.04)"
-            strokeWidth="8"
+            stroke="rgba(0,0,0,0.06)"
+            strokeWidth="7"
             strokeDasharray={circumference}
             strokeDashoffset={circumference * 0.25}
             strokeLinecap="round"
@@ -43,18 +43,18 @@ export const HealthGauge: React.FC<HealthGaugeProps> = ({ score }) => {
             cx="60" cy="60" r="54"
             fill="none"
             stroke={color}
-            strokeWidth="8"
+            strokeWidth="7"
             strokeDasharray={circumference}
             strokeDashoffset={dashOffset}
             strokeLinecap="round"
             className="transition-all duration-300"
-            style={{ filter: `drop-shadow(0 0 8px ${color}50)` }}
+            
           />
         </svg>
         {/* Center text */}
         <div className="absolute flex flex-col items-center translate-y-1">
-          <span className="text-4xl font-bold tabular-nums" style={{ color }}>{animatedScore}</span>
-          <span className="text-[11px] font-medium text-slate-600 -mt-1">/ 100</span>
+          <span className="text-[44px] font-semibold tracking-[-0.04em] tabular-nums text-[#1d1d1f]" >{animatedScore}</span>
+          <span className="text-[12px] font-medium text-[#86868b] -mt-0.5">/ 100</span>
         </div>
       </div>
     </div>
