@@ -46,11 +46,11 @@ export const Register = () => {
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="text-center mb-10">
-        <div className="w-12 h-12 mx-auto bg-[#1d1d1f] rounded-[14px] flex items-center justify-center mb-8">
-          <span className="text-[#fff] font-semibold text-xl tracking-tight">S</span>
+        <div className="w-12 h-12 mx-auto bg-ink rounded-[14px] flex items-center justify-center mb-8">
+          <span className="text-canvas font-semibold text-xl tracking-tight">S</span>
         </div>
-        <h1 className="text-[34px] leading-[1.1] font-semibold text-[#1d1d1f] tracking-[-0.034em]">Create your account</h1>
-        <p className="text-[#6e6e73] text-[17px] mt-3 tracking-[-0.016em]">It takes less than a minute.</p>
+        <h1 className="text-[34px] leading-[1.1] font-semibold text-ink tracking-[-0.034em]">Create your account</h1>
+        <p className="text-ink-2 text-[17px] mt-3 tracking-[-0.016em]">It takes less than a minute.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -62,7 +62,7 @@ export const Register = () => {
           {['student', 'parent'].map(role => (
             <label key={role} className="cursor-pointer">
               <input type="radio" name="role" value={role} checked={formData.role === role} onChange={handleChange} className="peer sr-only" />
-              <div className="h-10 flex items-center justify-center rounded-[9px] text-[14px] font-medium text-[#6e6e73] transition-all peer-checked:bg-[#fff] peer-checked:text-[#1d1d1f] peer-checked:shadow-sm capitalize">
+              <div className="h-10 flex items-center justify-center rounded-[9px] text-[14px] font-medium text-ink-2 transition-all peer-checked:bg-surface peer-checked:text-ink peer-checked:shadow-sm capitalize">
                 {role}
               </div>
             </label>
@@ -79,9 +79,9 @@ export const Register = () => {
         </Button>
       </form>
 
-      <p className="text-center mt-8 text-[14px] text-[#6e6e73]">
+      <p className="text-center mt-8 text-[14px] text-ink-2">
         Already have an account?{' '}
-        <Link to="/login" className="text-[#0071e3] hover:underline font-medium">Sign in</Link>
+        <Link to="/login" className="text-accent hover:underline font-medium">Sign in</Link>
       </p>
     </motion.div>
   );
