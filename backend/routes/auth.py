@@ -16,6 +16,7 @@ import bcrypt
 
 from app import db
 from models import User
+from plans import start_trial_end
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -76,6 +77,7 @@ def register():
         role=role,
         name=name,
         monthly_allowance=float(allowance),
+        trial_ends_at=start_trial_end(),
     )
     db.session.add(user)
     db.session.commit()
