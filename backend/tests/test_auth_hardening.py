@@ -3,13 +3,13 @@ from utils import ratelimit
 
 
 def _reg(client, email, pw='secret123'):
-    r = client.post('/api/auth/register', json={'email': email, 'password': pw, 'name': 'T'})
+    r = client.post('/api/auth/register', json={'email': email, 'password': pw, 'name': 'T', 'date_of_birth': '2002-05-01', 'accept_terms': True})
     assert r.status_code == 201
     return r.get_json()
 
 
 def test_password_min_length_is_8(client):
-    r = client.post('/api/auth/register', json={'email': 'short@test.com', 'password': 'abc1234', 'name': 'T'})
+    r = client.post('/api/auth/register', json={'email': 'short@test.com', 'password': 'abc1234', 'name': 'T', 'date_of_birth': '2002-05-01', 'accept_terms': True})
     assert r.status_code == 400
 
 

@@ -31,6 +31,13 @@ class User(db.Model):
     billing_ref = db.Column(db.String(100), nullable=True)  # provider subscription id
     email_verified = db.Column(db.Boolean, nullable=False, default=False, server_default='0')
 
+    # DPDP: age, guardian consent for under-18s, and when the terms were accepted.
+    date_of_birth = db.Column(db.Date, nullable=True)
+    guardian_email = db.Column(db.String(120), nullable=True)
+    consent_status = db.Column(db.String(20), nullable=False, default='granted', server_default='granted')  # granted | pending
+    consent_at = db.Column(db.DateTime, nullable=True)
+    terms_accepted_at = db.Column(db.DateTime, nullable=True)
+
     # Relationships
     parent = db.relationship('User', remote_side=[id], backref='children')
     expenses = db.relationship('Expense', backref='user', lazy='dynamic', cascade='all, delete-orphan')

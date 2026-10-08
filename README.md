@@ -140,13 +140,13 @@ Point the Razorpay webhook at `/api/billing/webhook` for `subscription.activated
 
 ## Roadmap
 
-Shipped: Apple-style design system, dark mode, landing page, 7-day trial, paywall and pricing, Razorpay seam, subscription detection, savings goals, auth hardening (rate limits, password reset, email verification), tested API and CI.
+Shipped: Apple-style design system, dark mode, landing page, 7-day trial, paywall and pricing, Razorpay seam, subscription detection, savings goals, DPDP age gate and guardian consent, auth hardening (rate limits, password reset, email verification), tested API and CI.
 
 Next, roughly in order:
 
 - [x] Savings goals with projected finish dates (free for everyone)
 - [x] Auth hardening: rate limiting, password reset, email verification (Supabase swap-in is a documented seam)
-- [ ] DPDP consent flow and age gate for under-18 users
+- [x] DPDP consent flow and age gate for under-18 users (needs a lawyer's review before launch)
 - [ ] Money stored as integer paise, user-entered expense dates
 - [ ] UPI / bank statement import (CSV and PDF)
 - [ ] Account Aggregator integration for consented bank data
@@ -159,6 +159,7 @@ Next, roughly in order:
 - Passwords hashed with bcrypt, 8 character minimum. JWT access and refresh tokens.
 - Rate limits on login, register and password reset. Reset links are signed, expire in one hour and work once. The forgot-password endpoint never reveals whether an email has an account.
 - Production refuses to start without `JWT_SECRET_KEY`.
+- Privacy (India's DPDP Act): date of birth is collected at sign-up. Under-18s cannot use the app until a parent or guardian approves by a signed, 7-day, single-use email link; declining deletes the account. No ads and no marketing tracking. Users can download all their data or delete their account from Profile (`GET /api/auth/export`, `DELETE /api/auth/me`). The in-app Terms and Privacy page is a plain-language draft, not legal advice.
 - Model retraining is limited to `ADMIN_EMAILS`.
 - Webhooks are accepted only with a valid HMAC signature.
 - Found a vulnerability? Please open a private security advisory on GitHub instead of a public issue.
