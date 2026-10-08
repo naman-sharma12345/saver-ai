@@ -10,8 +10,10 @@ from functools import wraps
 from flask import current_app, jsonify
 from flask_jwt_extended import get_jwt_identity
 
-PRO_FEATURES = frozenset({'ai_insights', 'forecast', 'store_alternatives', 'parent_link'})
-FREE_FEATURES = frozenset({'expenses', 'budgets', 'basic_analytics'})
+# Free forever: the daily-habit core (tracking, budgets, runway, health score, alerts, 1 tip a day,
+# subscription headline). Pro: the depth (every tip, ML forecast, store finder, details, parent link).
+PRO_FEATURES = frozenset({'all_tips', 'forecast', 'store_alternatives', 'parent_link', 'subscription_details'})
+FREE_FEATURES = frozenset({'expenses', 'budgets', 'basic_analytics', 'health_score', 'anomaly_alerts', 'daily_tip', 'subscription_summary'})
 
 PLAN_PRICES_INR = {'monthly': 79, 'yearly': 599}  # placeholders, validate with real users
 
