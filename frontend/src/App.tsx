@@ -10,10 +10,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Lazy loaded pages
 const Landing = React.lazy(() => import('./pages/Landing').then(m => ({ default: m.Landing })));
 const Pricing = React.lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
+const Privacy = React.lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })));
 const Goals = React.lazy(() => import('./pages/student/Goals').then(m => ({ default: m.Goals })));
 const Subscriptions = React.lazy(() => import('./pages/student/Subscriptions').then(m => ({ default: m.Subscriptions })));
 const ForgotPassword = React.lazy(() => import('./pages/auth/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
 const ResetPassword = React.lazy(() => import('./pages/auth/ResetPassword').then(m => ({ default: m.ResetPassword })));
+const GuardianConsent = React.lazy(() => import('./pages/auth/GuardianConsent').then(m => ({ default: m.GuardianConsent })));
 const VerifyEmail = React.lazy(() => import('./pages/auth/VerifyEmail').then(m => ({ default: m.VerifyEmail })));
 const Login = React.lazy(() => import('./pages/auth/Login').then(m => ({ default: m.Login })));
 const Register = React.lazy(() => import('./pages/auth/Register').then(m => ({ default: m.Register })));
@@ -112,11 +114,13 @@ function App() {
           <Suspense fallback={<Loader fullScreen />}>
             <Routes>
               <Route path="/" element={<Landing />} />
+              <Route path="/privacy" element={<Privacy />} />
               <Route element={<AuthLayout />}>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/guardian-consent" element={<GuardianConsent />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
               </Route>
               <Route element={<MainLayout />}>
