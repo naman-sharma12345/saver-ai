@@ -18,7 +18,10 @@ export const recommendationsApi = {
   }
 };
 
+export interface BudgetPaceItem { category: string; limit: number; spent: number; projected: number; status: 'over' | 'overshoot' | 'tight' | 'ok'; safe_daily?: number }
+
 export const budgetsApi = {
+  pace: async (): Promise<{ day: number; days_in_month: number; items: BudgetPaceItem[] }> => (await api.get('/budgets/pace')).data,
   getAll: async (month?: string) => {
     const response = await api.get('/budgets', { params: { month } });
     return response.data;
