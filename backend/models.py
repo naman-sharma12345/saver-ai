@@ -29,6 +29,7 @@ class User(db.Model):
     trial_ends_at = db.Column(db.DateTime, nullable=True)
     plan_expires_at = db.Column(db.DateTime, nullable=True)
     billing_ref = db.Column(db.String(100), nullable=True)  # provider subscription id
+    email_verified = db.Column(db.Boolean, nullable=False, default=False, server_default='0')
 
     # Relationships
     parent = db.relationship('User', remote_side=[id], backref='children')
@@ -45,6 +46,7 @@ class User(db.Model):
             'monthly_allowance': self.monthly_allowance,
             'parent_id': self.parent_id,
             'created_at': self.created_at.isoformat() if self.created_at else None,
+            'email_verified': bool(self.email_verified),
             'entitlement': get_entitlement(self),
         }
 
