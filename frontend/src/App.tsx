@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Landing = React.lazy(() => import('./pages/Landing').then(m => ({ default: m.Landing })));
 const Pricing = React.lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
 const Privacy = React.lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })));
+const ImportStatement = React.lazy(() => import('./pages/student/ImportStatement').then(m => ({ default: m.ImportStatement })));
 const Goals = React.lazy(() => import('./pages/student/Goals').then(m => ({ default: m.Goals })));
 const Subscriptions = React.lazy(() => import('./pages/student/Subscriptions').then(m => ({ default: m.Subscriptions })));
 const ForgotPassword = React.lazy(() => import('./pages/auth/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
@@ -130,6 +131,7 @@ function App() {
                 <Route path="/health" element={<ProtectedRoute allowedRole="student"><Health /></ProtectedRoute>} />
                 <Route path="/recommendations" element={<ProtectedRoute allowedRole="student"><Recommendations /></ProtectedRoute>} />
                 <Route path="/stores" element={<ProtectedRoute allowedRole="student"><Stores /></ProtectedRoute>} />
+                <Route path="/import" element={<ProtectedRoute allowedRole="student"><ImportStatement /></ProtectedRoute>} />
                 <Route path="/goals" element={<ProtectedRoute allowedRole="student"><Goals /></ProtectedRoute>} />
                 <Route path="/subscriptions" element={<ProtectedRoute allowedRole="student"><Subscriptions /></ProtectedRoute>} />
                 <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
