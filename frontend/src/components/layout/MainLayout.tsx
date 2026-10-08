@@ -17,6 +17,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils/formatters';
 import { ThemeToggle } from '../ui/ThemeToggle';
+import { TrialBanner } from '../billing/Paywall';
 
 const studentNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -153,6 +154,7 @@ export const MainLayout = () => {
 
         {/* Page content */}
         <div className="flex-1 px-5 py-8 lg:px-14 lg:py-14 max-w-[1240px] w-full mx-auto">
+          {user?.role === 'student' && <TrialBanner />}
           <Outlet />
         </div>
       </main>

@@ -5,6 +5,7 @@ GET /api/recommendations – returns ML-powered saving tips with daily caching.
 
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from plans import require_feature
 
 from ml.recommendation_engine import cache_recommendations_for_user
 
@@ -13,6 +14,7 @@ recommendations_bp = Blueprint('recommendations', __name__)
 
 @recommendations_bp.route('/recommendations', methods=['GET'])
 @jwt_required()
+@require_feature('ai_insights')
 def get_recommendations():
     """
     Return AI-generated saving recommendations.

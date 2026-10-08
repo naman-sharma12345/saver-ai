@@ -54,8 +54,15 @@ class Config:
         if e.strip()
     ]
 
-    # External AI API Key
-    AI_API_KEY = os.getenv('AI_API_KEY', '')
+    # All "AI" in SaverAI is local machine learning (scikit-learn). No LLM or model API keys.
+
+    # Billing. With no Razorpay keys the app runs in mock mode (no real charges).
+    TRIAL_DAYS = int(os.getenv('TRIAL_DAYS', '7'))
+    RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
+    RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
+    RAZORPAY_WEBHOOK_SECRET = os.getenv('RAZORPAY_WEBHOOK_SECRET', '')
+    RAZORPAY_PLAN_ID_MONTHLY = os.getenv('RAZORPAY_PLAN_ID_MONTHLY', '')
+    RAZORPAY_PLAN_ID_YEARLY = os.getenv('RAZORPAY_PLAN_ID_YEARLY', '')
 
 
 class DevelopmentConfig(Config):
@@ -66,6 +73,7 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration."""
     DEBUG = False
+    IS_PRODUCTION = True
 
 
 class TestingConfig(Config):

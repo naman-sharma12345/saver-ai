@@ -9,6 +9,9 @@ from app import db
 # ─────────────────────────────────────────────────────────────────────────────
 # User
 # ─────────────────────────────────────────────────────────────────────────────
+from plans import get_entitlement  # noqa: E402
+
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -20,6 +23,12 @@ class User(db.Model):
     monthly_allowance = db.Column(db.Float, default=0.0)
     parent_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    # Billing / entitlements (see plans.py). Times are naive UTC.
+    plan = db.Column(db.String(20), nullable=False, default='free', server_default='free')  # 'free' | 'pro'
+    trial_ends_at = db.Column(db.DateTime, nullable=True)
+    plan_expires_at = db.Column(db.DateTime, nullable=True)
+    billing_ref = db.Column(db.String(100), nullable=True)  # provider subscription id
 
     # Relationships
     parent = db.relationship('User', remote_side=[id], backref='children')
@@ -36,6 +45,7 @@ class User(db.Model):
             'monthly_allowance': self.monthly_allowance,
             'parent_id': self.parent_id,
             'created_at': self.created_at.isoformat() if self.created_at else None,
+            'entitlement': get_entitlement(self),
         }
 
 
