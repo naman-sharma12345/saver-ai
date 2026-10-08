@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from app import create_app, db as _db
 from models import User, Expense, Category, Budget, Store
 import bcrypt
+from datetime import datetime, timedelta, timezone
 
 
 @pytest.fixture(scope='session')
@@ -30,6 +31,7 @@ def app():
             role='student',
             name='Test Student',
             monthly_allowance=15000.0,
+            trial_ends_at=datetime.utcnow() + timedelta(days=7),
         )
         parent = User(
             email='parent@test.com',
@@ -50,7 +52,6 @@ def app():
         _db.session.commit()
 
         # Seed some expenses
-        from datetime import datetime, timedelta, timezone
         import random
         random.seed(42)
 
