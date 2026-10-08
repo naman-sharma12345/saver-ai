@@ -21,8 +21,8 @@ describe('Login Component', () => {
       </BrowserRouter>
     )
 
-    expect(screen.getByText('Welcome Back')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('student@example.com')).toBeInTheDocument()
+    expect(screen.getByText('Welcome back')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('you@example.com')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Sign In/i })).toBeInTheDocument()
   })
