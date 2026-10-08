@@ -16,7 +16,7 @@ from datetime import date, datetime
 import bcrypt
 
 from app import db
-from models import User, Expense, Budget, Goal
+from models import User, Expense, Budget, Goal, CategoryRule
 from plans import start_trial_end
 from utils.ratelimit import rate_limit
 from utils.mailer import send_email
@@ -378,6 +378,7 @@ def export_data():
         'goals': [{'name': g.name, 'target_amount': g.target_amount, 'saved_amount': g.saved_amount,
                    'deadline': g.deadline.isoformat() if g.deadline else None}
                   for g in Goal.query.filter_by(user_id=uid).all()],
+        'category_rules': [r.to_dict() for r in CategoryRule.query.filter_by(user_id=uid).all()],
     }), 200
 
 
@@ -394,6 +395,7 @@ def delete_account():
     if not isinstance(password, str) or not bcrypt.checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
         return jsonify({'error': 'Password is incorrect'}), 403
     Goal.query.filter_by(user_id=user.id).delete()
+    CategoryRule.query.filter_by(user_id=user.id).delete()
     User.query.filter_by(parent_id=user.id).update({'parent_id': None})
     db.session.delete(user)
     db.session.commit()
