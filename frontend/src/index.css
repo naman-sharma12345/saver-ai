@@ -1,7 +1,12 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
 
 @theme {
+  /* Lifted muted text tones for AA-level contrast on dark surfaces */
+  --color-slate-400: #a5b1c6;
+  --color-slate-500: #8794ab;
+  --color-slate-600: #6b7a93;
+
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
   /* Refined cyan/blue brand palette */
@@ -42,7 +47,7 @@
   }
 
   body {
-    background-color: #030712;
+    background-color: #050816;
     color: #e2e8f0;
     font-family: var(--font-sans);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -69,23 +74,48 @@
 @layer components {
   /* Glass card — the core building block */
   .glass-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.025) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 8px 30px rgba(0, 0, 0, 0.28);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
   }
 
   .glass-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(34, 211, 238, 0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 12px 40px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(34, 211, 238, 0.05);
+  }
+
+  /* App shell: soft aurora behind all signed-in pages */
+  .app-bg {
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(34, 211, 238, 0.10), transparent 60%),
+      radial-gradient(700px 500px at 0% 40%, rgba(99, 102, 241, 0.09), transparent 60%),
+      radial-gradient(600px 400px at 70% 110%, rgba(236, 72, 153, 0.06), transparent 60%),
+      #050816;
+    background-attachment: fixed;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-slate-500);
   }
 
   /* Elevated glass variant */
   .glass-elevated {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    border-radius: 20px;
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.03),
       0 4px 24px rgba(0, 0, 0, 0.4),
@@ -142,6 +172,13 @@
 
   .text-gradient {
     background: linear-gradient(135deg, #22d3ee 0%, #6366f1 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-hero {
+    background: linear-gradient(120deg, #ffffff 0%, #a5f3fc 45%, #c4b5fd 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
