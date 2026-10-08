@@ -30,9 +30,9 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f5f7] text-center p-4">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-canvas text-center p-4">
           <div className="max-w-md w-full space-y-5">
-                        <h1 className="text-[28px] font-semibold tracking-tight text-[#1d1d1f]">Something went wrong</h1>
+                        <h1 className="text-[28px] font-semibold tracking-tight text-ink">Something went wrong</h1>
             <p className="text-sm text-slate-500 bg-white/[0.03] border border-white/[0.06] p-4 rounded-xl font-mono text-left overflow-auto max-h-32">{this.state.error?.message}</p>
             <button onClick={() => window.location.reload()} className="h-12 bg-[#0071e3] hover:bg-[#0077ed] text-[#fff] rounded-full font-medium transition-colors w-full">Refresh</button>
           </div>
@@ -51,18 +51,18 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#f5f5f7]"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-canvas"
     >
       {/* Ambient glow */}
 
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6, type: 'spring', bounce: 0.4 }} className="flex flex-col items-center relative">
-        <div className="w-16 h-16 mb-6 bg-[#1d1d1f] rounded-[20px] flex items-center justify-center">
-          <span className="text-[#fff] font-semibold text-3xl">S</span>
+        <div className="w-16 h-16 mb-6 bg-ink rounded-[20px] flex items-center justify-center">
+          <span className="text-canvas font-semibold text-3xl">S</span>
         </div>
-        <motion.h1 initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2, duration: 0.4 }} className="text-[28px] font-semibold text-[#1d1d1f] tracking-[-0.03em]">
+        <motion.h1 initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2, duration: 0.4 }} className="text-[28px] font-semibold text-ink tracking-[-0.03em]">
           SaverAI
         </motion.h1>
-        <motion.p initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4, duration: 0.4 }} className="text-[15px] text-[#6e6e73] mt-2">
+        <motion.p initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4, duration: 0.4 }} className="text-[15px] text-ink-2 mt-2">
           Know where your money goes.
         </motion.p>
       </motion.div>
