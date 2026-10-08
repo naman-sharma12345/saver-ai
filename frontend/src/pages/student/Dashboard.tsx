@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+import { useEntitlement } from '../../hooks/useEntitlement';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../../components/ui/Card';
@@ -35,10 +37,11 @@ export const Dashboard = () => {
   const { data: healthData, isLoading: lH } = useHealthScore();
   const { data: categoryData, isLoading: lC } = useSpendingByCategory(currentMonth);
   const { data: trendData, isLoading: lT } = useSpendingOverTime(6);
+  const { hasFeature } = useEntitlement();
   const { data: predictionData, isLoading: lP } = useNextMonthPrediction();
   const { data: anomaliesData } = useAnomalies();
 
-  if (lH || lC || lT || lP) return <Loader />;
+  if (lH || lC || lT || (lP && hasFeature('forecast'))) return <Loader />;
 
   const totalSpent = healthData?.total_spending || 0;
   const allowance = user?.monthly_allowance || 0;
@@ -98,6 +101,9 @@ export const Dashboard = () => {
             <div className="lg:col-span-2 lg:pl-12 lg:border-l border-black/[0.07] flex flex-col justify-center divide-y divide-black/[0.07]">
               <div className="pb-6">
                 <p className="eyebrow">Forecast for next month</p>
+                {!hasFeature('forecast') ? (
+                  <Link to="/pricing" className="inline-block mt-2 text-[15px] font-medium text-accent">Unlock forecast with Pro</Link>
+                ) : (
                 <div className="flex items-baseline gap-3 mt-2">
                   <span className="display-number text-[32px]">{formatCurrency(predictionData?.predicted_amount || 0)}</span>
                   <span className={`inline-flex items-center gap-0.5 text-[13px] font-medium ${rising ? 'text-red-400' : 'text-emerald-400'}`}>
@@ -105,6 +111,7 @@ export const Dashboard = () => {
                     {rising ? 'Rising' : 'Falling'}
                   </span>
                 </div>
+                )}
               </div>
               <div className="pt-6">
                 <p className="eyebrow">Financial health</p>
