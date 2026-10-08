@@ -78,6 +78,7 @@ def create_app(config_name=None):
     from routes.imports import imports_bp
     from routes.ask import ask_bp
     from routes.digest import digest_bp
+    from routes.category_rules import rules_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(profile_bp, url_prefix='/api')
@@ -95,6 +96,7 @@ def create_app(config_name=None):
     app.register_blueprint(imports_bp, url_prefix='/api')
     app.register_blueprint(ask_bp, url_prefix='/api')
     app.register_blueprint(digest_bp, url_prefix='/api')
+    app.register_blueprint(rules_bp, url_prefix='/api')
 
     # ── APScheduler – daily recommendation generation ────────────────────
     try:

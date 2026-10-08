@@ -198,3 +198,18 @@ class Goal(db.Model):
     saved_amount = db.Column(db.Float, nullable=False, default=0.0)
     deadline = db.Column(db.Date, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class CategoryRule(db.Model):
+    """A category the user taught SaverAI for a merchant. Beats the model for that user."""
+    __tablename__ = 'category_rules'
+    __table_args__ = (db.UniqueConstraint('user_id', 'merchant_key', name='uq_rule_user_merchant'),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    merchant_key = db.Column(db.String(120), nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    def to_dict(self):
+        return {'id': self.id, 'merchant': self.merchant_key, 'category': self.category}

@@ -39,6 +39,19 @@ export const useCreateExpense = () => {
   });
 };
 
+export const useUpdateExpense = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: expensesApi.update,
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-pace'] });
+      toast.success(res?.rule_learned ? `Got it. ${res.rule_learned.merchant} will be ${res.rule_learned.category} from now on.` : 'Expense updated');
+    },
+  });
+};
+
 export const useDeleteExpense = () => {
   const queryClient = useQueryClient();
   return useMutation({
