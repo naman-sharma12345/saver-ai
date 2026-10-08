@@ -12,7 +12,17 @@ export const Register = () => {
 
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', role: 'student', monthly_allowance: '',
+    date_of_birth: '', guardian_email: '',
   });
+  const [accepted, setAccepted] = useState(false);
+  const [sentTo, setSentTo] = useState('');
+  const isMinor = (() => {
+    if (formData.role !== 'student' || !formData.date_of_birth) return false;
+    const d = new Date(formData.date_of_birth); const t = new Date();
+    let age = t.getFullYear() - d.getFullYear();
+    if (t.getMonth() < d.getMonth() || (t.getMonth() === d.getMonth() && t.getDate() < d.getDate())) age--;
+    return age < 18;
+  })();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -22,14 +32,21 @@ export const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.password || !formData.name) return toast.error('Please fill required fields');
+    if (formData.role === 'student' && !formData.date_of_birth) return toast.error('Please enter your date of birth');
+    if (isMinor && !formData.guardian_email) return toast.error('Please enter a parent or guardian email');
+    if (!accepted) return toast.error('Please accept the Terms and Privacy Policy');
 
     setIsLoading(true);
     try {
       const payload = {
         ...formData,
-        monthly_allowance: formData.role === 'student' ? parseFloat(formData.monthly_allowance) || 0 : undefined
+        monthly_allowance: formData.role === 'student' ? parseFloat(formData.monthly_allowance) || 0 : undefined,
+        date_of_birth: formData.role === 'student' ? formData.date_of_birth : undefined,
+        guardian_email: isMinor ? formData.guardian_email : undefined,
+        accept_terms: true,
       };
-      await authApi.register(payload);
+      const res = await authApi.register(payload);
+      if (res?.consent_required) { setSentTo(formData.guardian_email); return; }
       toast.success('Account created! Please sign in.');
       navigate('/login');
     } catch (err: any) {
@@ -38,6 +55,16 @@ export const Register = () => {
       setIsLoading(false);
     }
   };
+
+  if (sentTo) {
+    return (
+      <div className="text-center">
+        <h1 className="text-[34px] leading-[1.1] font-semibold text-ink tracking-[-0.034em]">Ask your parent</h1>
+        <p className="text-ink-2 text-[17px] mt-3">We emailed <b>{sentTo}</b> to approve your account. You can sign in once they say yes.</p>
+        <p className="mt-8"><Link to="/login" className="text-accent font-medium">Back to sign in</Link></p>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -70,8 +97,20 @@ export const Register = () => {
         </div>
 
         {formData.role === 'student' && (
+          <Input label="Date of birth" name="date_of_birth" type="date" max={new Date().toISOString().slice(0, 10)} value={formData.date_of_birth} onChange={handleChange} required />
+        )}
+        {isMinor && (
+          <Input name="guardian_email" type="email" aria-label="Parent or guardian email" placeholder="Parent or guardian email" hint="Under 18? A parent has to approve your account (India's DPDP law)." value={formData.guardian_email} onChange={handleChange} required />
+        )}
+
+        {formData.role === 'student' && (
           <Input label="" name="monthly_allowance" type="number" aria-label="Monthly allowance" placeholder="Monthly allowance (₹)" value={formData.monthly_allowance} onChange={handleChange} />
         )}
+
+        <label className="flex items-start gap-2 text-[13px] text-ink-2 !mt-5 cursor-pointer">
+          <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5" />
+          <span>I agree to the <Link to="/privacy" className="text-accent hover:underline">Terms and Privacy Policy</Link>.</span>
+        </label>
 
         <Button type="submit" size="lg" className="w-full !mt-6" isLoading={isLoading}>
           Create account
