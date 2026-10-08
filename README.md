@@ -20,6 +20,7 @@ Indian students run a monthly allowance on UPI. Existing apps show *what* you sp
 SaverAI is built around that moment.
 
 - **Allowance runway.** "You have Rs 12,000 left, about Rs 522 a day for the next 23 days."
+- **Goals with a finish date.** "Headphones: on track for 12 Dec. Save Rs 1,012 a month to hit your date."
 - **Coaching, not judging.** Nudges based on your own patterns, flagged unusual spend, cheaper places nearby.
 - **Parents in the loop, students in control.** Parents set the allowance and see a summary. Students keep their own data view.
 - **Private by design.** Your data is yours. Built with India's DPDP Rules 2025 in mind, including parental consent for under-18 users (in progress, see roadmap).
@@ -67,7 +68,7 @@ Flask API  ->  SQLAlchemy  ->  SQLite (dev) / PostgreSQL (prod)
    |
    +-- ml/          scikit-learn models (categorizer, anomaly, forecast, subscriptions)
    +-- plans.py     plans, trial and entitlement checks (single source of truth)
-   +-- routes/      auth, expenses, budgets, analytics, stores, parent, billing, subscriptions
+   +-- routes/      auth, expenses, budgets, analytics, stores, parent, billing, subscriptions, goals
    +-- APScheduler  daily recommendation job
 ```
 
@@ -139,11 +140,11 @@ Point the Razorpay webhook at `/api/billing/webhook` for `subscription.activated
 
 ## Roadmap
 
-Shipped: Apple-style design system, dark mode, landing page, 7-day trial, paywall and pricing, Razorpay seam, subscription detection, auth hardening (rate limits, password reset, email verification), tested API and CI.
+Shipped: Apple-style design system, dark mode, landing page, 7-day trial, paywall and pricing, Razorpay seam, subscription detection, savings goals, auth hardening (rate limits, password reset, email verification), tested API and CI.
 
 Next, roughly in order:
 
-- [ ] Savings goals with projected finish dates
+- [x] Savings goals with projected finish dates (free for everyone)
 - [x] Auth hardening: rate limiting, password reset, email verification (Supabase swap-in is a documented seam)
 - [ ] DPDP consent flow and age gate for under-18 users
 - [ ] Money stored as integer paise, user-entered expense dates
