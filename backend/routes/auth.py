@@ -17,6 +17,10 @@ import bcrypt
 from app import db
 from models import User
 from plans import start_trial_end
+from utils.ratelimit import rate_limit
+from utils.mailer import send_email
+from utils.tokens import make_token, read_token
+from flask import current_app
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -27,6 +31,7 @@ EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
 # POST /api/auth/register
 # ─────────────────────────────────────────────────────────────────────────────
 @auth_bp.route('/register', methods=['POST'])
+@rate_limit('register', 10, 3600)
 def register():
     """Register a new student or parent account."""
     data = request.get_json(silent=True)
@@ -61,8 +66,8 @@ def register():
     if role not in ('student', 'parent'):
         return jsonify({'error': "Role must be 'student' or 'parent'"}), 400
 
-    if len(password) < 6:
-        return jsonify({'error': 'Password must be at least 6 characters'}), 400
+    if len(password) < 8:
+        return jsonify({'error': 'Password must be at least 8 characters'}), 400
 
     # ── Check for existing user ──────────────────────────────────────────
     if User.query.filter_by(email=email).first():
@@ -98,6 +103,7 @@ def register():
 # POST /api/auth/login
 # ─────────────────────────────────────────────────────────────────────────────
 @auth_bp.route('/login', methods=['POST'])
+@rate_limit('login', 10, 300)
 def login():
     """Authenticate user and return JWT tokens."""
     data = request.get_json(silent=True)
@@ -148,3 +154,88 @@ def me():
     if user is None:
         return jsonify({'error': 'User not found'}), 404
     return jsonify({'user': user.to_dict()}), 200
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Password reset
+# ─────────────────────────────────────────────────────────────────────────────
+RESET_MAX_AGE = 3600
+VERIFY_MAX_AGE = 3 * 86400
+
+
+@auth_bp.route('/forgot-password', methods=['POST'])
+@rate_limit('forgot', 5, 3600)
+def forgot_password():
+    """Always answers 200 so the endpoint cannot be used to discover which emails exist."""
+    data = request.get_json(silent=True) or {}
+    email = str(data.get('email', '')).strip().lower()
+    out = {'message': 'If that email has an account, a reset link is on its way.'}
+    user = User.query.filter_by(email=email).first() if email else None
+    if user:
+        token = make_token('reset', user.id, user.password_hash)
+        link = '%s/reset-password?token=%s' % (current_app.config['FRONTEND_URL'], token)
+        send_email(user.email, 'Reset your SaverAI password',
+                   'Open this link within one hour to choose a new password:\n%s\n\nIf you did not ask for this, ignore this email.' % link)
+        if current_app.config.get('EXPOSE_AUTH_TOKENS'):
+            out['dev_token'] = token
+    return jsonify(out), 200
+
+
+@auth_bp.route('/reset-password', methods=['POST'])
+@rate_limit('reset', 10, 3600)
+def reset_password():
+    data = request.get_json(silent=True) or {}
+    token, password = data.get('token'), data.get('password')
+    if not isinstance(token, str) or not isinstance(password, str):
+        return jsonify({'error': 'token and password are required'}), 400
+    if len(password) < 8:
+        return jsonify({'error': 'Password must be at least 8 characters'}), 400
+    payload, err = read_token('reset', token, RESET_MAX_AGE)
+    if err:
+        return jsonify({'error': 'This reset link has %s. Request a new one.' % ('expired' if err == 'expired' else 'a problem')}), 400
+    user = User.query.get(payload['uid'])
+    # The token carries the old password hash tail, so it works exactly once.
+    if user is None or not user.password_hash.endswith(payload['fp']):
+        return jsonify({'error': 'This reset link was already used. Request a new one.'}), 400
+    user.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    db.session.commit()
+    return jsonify({'message': 'Password updated. You can sign in now.'}), 200
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Email verification
+# ─────────────────────────────────────────────────────────────────────────────
+@auth_bp.route('/send-verification', methods=['POST'])
+@jwt_required()
+@rate_limit('verify-send', 5, 3600)
+def send_verification():
+    user = User.query.get(int(get_jwt_identity()))
+    if user is None:
+        return jsonify({'error': 'User not found'}), 404
+    if user.email_verified:
+        return jsonify({'message': 'Already verified'}), 200
+    token = make_token('verify', user.id, user.email)
+    link = '%s/verify-email?token=%s' % (current_app.config['FRONTEND_URL'], token)
+    send_email(user.email, 'Verify your SaverAI email', 'Confirm your email by opening:\n%s' % link)
+    out = {'message': 'Verification email sent.'}
+    if current_app.config.get('EXPOSE_AUTH_TOKENS'):
+        out['dev_token'] = token
+    return jsonify(out), 200
+
+
+@auth_bp.route('/verify-email', methods=['POST'])
+@rate_limit('verify', 20, 3600)
+def verify_email():
+    data = request.get_json(silent=True) or {}
+    token = data.get('token')
+    if not isinstance(token, str):
+        return jsonify({'error': 'token is required'}), 400
+    payload, err = read_token('verify', token, VERIFY_MAX_AGE)
+    if err:
+        return jsonify({'error': 'This verification link is not valid. Request a new one.'}), 400
+    user = User.query.get(payload['uid'])
+    if user is None or not user.email.endswith(payload['fp']):
+        return jsonify({'error': 'This verification link is not valid. Request a new one.'}), 400
+    user.email_verified = True
+    db.session.commit()
+    return jsonify({'message': 'Email verified.'}), 200
