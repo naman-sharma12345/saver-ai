@@ -14,6 +14,7 @@ from models import Expense
 from ml.categorizer import predict_category
 from ml.category_rules import rule_category
 from ml.statement_parser import parse_statement
+from utils.ratelimit import rate_limit
 from ml.pdf_statement import PdfError, decode_pdf, pdf_to_csv
 
 imports_bp = Blueprint('imports', __name__)
@@ -23,6 +24,7 @@ MAX_CHARS = 1_000_000
 
 @imports_bp.route('/expenses/import', methods=['POST'])
 @jwt_required()
+@rate_limit('import', 30, 600)
 def import_statement():
     user_id = int(get_jwt_identity())
     data = request.get_json(silent=True) or {}
