@@ -4,7 +4,7 @@ import { useRecommendations } from '../../hooks/useQueries';
 import { Card } from '../../components/ui/Card';
 import { Loader } from '../../components/ui/Loader';
 import { formatCurrency } from '../../utils/formatters';
-import { Lightbulb, Check, X, Sparkles, ArrowRight } from 'lucide-react';
+import { Lightbulb, Check, X, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const Recommendations = () => {
@@ -30,15 +30,17 @@ export const Recommendations = () => {
   if (index >= recs.length || recs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="w-20 h-20 bg-cyan-500/[0.08] rounded-full flex items-center justify-center mb-6">
-          <Sparkles size={36} className="text-cyan-400" />
+        <div className="w-16 h-16 bg-black/[0.05] rounded-full flex items-center justify-center mb-8">
+          <Sparkles size={26} strokeWidth={1.6} className="text-ink-2" />
         </div>
-        <h2 className="text-xl font-bold text-white mb-1">All caught up!</h2>
-        <p className="text-sm text-slate-500 max-w-sm">Check back tomorrow for fresh AI-powered saving tips.</p>
-        <div className="mt-8 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-          <p className="text-[11px] text-slate-600 uppercase tracking-wider font-medium">Total Savings Identified</p>
-          <p className="text-2xl font-bold text-emerald-400 mt-1 tabular-nums">{formatCurrency(data?.total_potential_savings || 0)}</p>
-        </div>
+        <h2 className="display-title !text-[34px]">You're all caught up</h2>
+        <p className="text-[17px] text-ink-2 max-w-sm mt-3 tracking-[-0.016em]">Check back tomorrow for fresh ways to save.</p>
+        {(data?.total_potential_savings || 0) > 0 && (
+          <div className="mt-10">
+            <p className="eyebrow">Savings identified</p>
+            <p className="display-number text-[44px] mt-2 text-ink">{formatCurrency(data?.total_potential_savings || 0)}</p>
+          </div>
+        )}
       </div>
     );
   }
@@ -48,24 +50,24 @@ export const Recommendations = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh]">
-      <div className="mb-10 text-center">
-        <h1 className="display-title">Smart Tips</h1>
-        <p className="text-sm text-slate-500 mt-1">Swipe right to save, left to dismiss</p>
+      <div className="mb-12 text-center">
+        <p className="eyebrow">{index + 1} of {recs.length}</p>
+        <h1 className="display-title mt-2">Smart tips</h1>
+        <p className="text-[15px] text-ink-2 mt-3">Swipe right to save a tip, left to dismiss.</p>
       </div>
 
-      {/* Card Stack */}
-      <div className="relative w-full max-w-sm aspect-[3/4]">
-        {/* Background ghost card for depth */}
+      <div className="relative w-full max-w-sm aspect-[4/5]">
         {index + 1 < recs.length && (
-          <div className="absolute inset-0 translate-y-3 scale-95 glass-card opacity-30 rounded-2xl" />
+          <div className="absolute inset-0 translate-y-3 scale-[0.96] glass-card opacity-50" />
         )}
 
         <AnimatePresence mode="wait">
           <motion.div
             key={index}
-            initial={{ scale: 0.95, opacity: 0, y: 30 }}
+            initial={{ scale: 0.96, opacity: 0, y: 24 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ x: exitX, opacity: 0, rotate: exitX > 0 ? 8 : -8, transition: { duration: 0.2 } }}
+            exit={{ x: exitX, opacity: 0, rotate: exitX > 0 ? 6 : -6, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             onDragEnd={(_, info) => {
@@ -75,25 +77,17 @@ export const Recommendations = () => {
             whileDrag={{ scale: 1.02, cursor: 'grabbing' }}
             className="absolute inset-0 cursor-grab touch-none"
           >
-            <Card variant="elevated" className="w-full h-full p-8 flex flex-col relative overflow-hidden">
-              {/* Top accent */}
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
-
-              {/* Icon */}
-              <div className="p-3 bg-cyan-500/[0.08] rounded-xl w-fit mb-8">
-                <Lightbulb size={22} className="text-cyan-400" />
+            <Card variant="elevated" className="w-full h-full p-9 flex flex-col">
+              <div className="w-11 h-11 rounded-full bg-black/[0.06] flex items-center justify-center mb-8">
+                <Lightbulb size={20} strokeWidth={1.8} className="text-ink" />
               </div>
-
-              {/* Recommendation Text */}
               <div className="flex-1">
-                <p className="text-lg font-medium text-white leading-relaxed">{cleanText}</p>
+                <p className="text-[24px] leading-[1.3] font-semibold tracking-[-0.022em] text-ink">{cleanText}</p>
               </div>
-
-              {/* Savings */}
               {currentRec.amount_saved > 0 && (
-                <div className="pt-6 mt-auto border-t border-white/[0.04]">
-                  <p className="text-[11px] text-slate-600 font-medium uppercase tracking-wider">Estimated Saving</p>
-                  <p className="text-2xl font-bold text-emerald-400 mt-1 tabular-nums">{formatCurrency(currentRec.amount_saved)}</p>
+                <div className="pt-6 mt-auto border-t border-black/[0.07]">
+                  <p className="eyebrow">You could save</p>
+                  <p className="display-number text-[32px] mt-2 text-emerald-400">{formatCurrency(currentRec.amount_saved)}</p>
                 </div>
               )}
             </Card>
@@ -101,17 +95,14 @@ export const Recommendations = () => {
         </AnimatePresence>
       </div>
 
-      {/* Action buttons */}
-      <div className="flex items-center gap-6 mt-10">
-        <button onClick={() => handleSwipe('left')} className="w-14 h-14 rounded-full bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-red-400 hover:bg-red-500/[0.08] hover:border-red-500/20 transition-all haptic">
-          <X size={24} />
+      <div className="flex items-center gap-5 mt-12">
+        <button onClick={() => handleSwipe('left')} aria-label="Dismiss tip" className="w-14 h-14 rounded-full bg-black/[0.06] hover:bg-black/[0.1] flex items-center justify-center text-ink-2 hover:text-ink transition-colors haptic">
+          <X size={22} />
         </button>
-        <button onClick={() => handleSwipe('right')} className="w-14 h-14 rounded-full bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-emerald-400 hover:bg-emerald-500/[0.08] hover:border-emerald-500/20 transition-all haptic">
-          <Check size={24} />
+        <button onClick={() => handleSwipe('right')} aria-label="Save tip" className="w-14 h-14 rounded-full bg-[#0071e3] hover:bg-[#0077ed] flex items-center justify-center text-[#fff] transition-colors haptic">
+          <Check size={22} />
         </button>
       </div>
-
-      <p className="mt-6 text-[11px] font-medium text-slate-600 tabular-nums">{index + 1} / {recs.length}</p>
     </div>
   );
 };
