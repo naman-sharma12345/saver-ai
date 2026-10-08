@@ -127,6 +127,10 @@ All settings are environment variables (see `backend/.env.example`).
 | `CORS_ORIGINS` | Allowed frontend origins |
 | `ADMIN_EMAILS` | Who may retrain the ML model |
 | `TRIAL_DAYS` | Free trial length, default 7 |
+| `FRONTEND_URL` | Base URL used in emailed links |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` | Email for reset and verification links. Empty `SMTP_HOST` only logs emails (development) |
+| `RATELIMIT_ENABLED`, `TRUST_PROXY` | Auth rate limits (on by default); set `TRUST_PROXY=1` behind a reverse proxy |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_JWT_SECRET` | Reserved for a future Supabase auth/db swap, unused today |
 | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Enable live billing |
 | `RAZORPAY_WEBHOOK_SECRET` | Verify Razorpay webhooks |
 | `RAZORPAY_PLAN_ID_MONTHLY`, `RAZORPAY_PLAN_ID_YEARLY` | Plans created in the Razorpay dashboard |
@@ -135,12 +139,12 @@ Point the Razorpay webhook at `/api/billing/webhook` for `subscription.activated
 
 ## Roadmap
 
-Shipped: Apple-style design system, dark mode, landing page, 7-day trial, paywall and pricing, Razorpay seam, subscription detection, tested API and CI.
+Shipped: Apple-style design system, dark mode, landing page, 7-day trial, paywall and pricing, Razorpay seam, subscription detection, auth hardening (rate limits, password reset, email verification), tested API and CI.
 
 Next, roughly in order:
 
 - [ ] Savings goals with projected finish dates
-- [ ] Auth hardening: rate limiting, email verification, password reset, Supabase-ready seam
+- [x] Auth hardening: rate limiting, password reset, email verification (Supabase swap-in is a documented seam)
 - [ ] DPDP consent flow and age gate for under-18 users
 - [ ] Money stored as integer paise, user-entered expense dates
 - [ ] UPI / bank statement import (CSV and PDF)
@@ -151,7 +155,8 @@ Next, roughly in order:
 
 ## Security
 
-- Passwords hashed with bcrypt. JWT access and refresh tokens.
+- Passwords hashed with bcrypt, 8 character minimum. JWT access and refresh tokens.
+- Rate limits on login, register and password reset. Reset links are signed, expire in one hour and work once. The forgot-password endpoint never reveals whether an email has an account.
 - Production refuses to start without `JWT_SECRET_KEY`.
 - Model retraining is limited to `ADMIN_EMAILS`.
 - Webhooks are accepted only with a valid HMAC signature.
