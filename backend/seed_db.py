@@ -22,6 +22,7 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='repla
 sys.path.insert(0, os.path.dirname(__file__))
 
 from app import create_app, db
+from plans import start_trial_end
 from models import User, Expense, Category, Budget, SavingRecommendation, Store
 
 def seed():
@@ -61,7 +62,7 @@ def seed():
         student1_email = 'student1@test.com'
         student1 = User.query.filter_by(email=student1_email).first()
         if not student1:
-            student1 = User(email=student1_email, password_hash=pw_hash, role='student', name='Rahul Sharma', monthly_allowance=15000.0, parent_id=parent.id)
+            student1 = User(email=student1_email, password_hash=pw_hash, role='student', name='Rahul Sharma', monthly_allowance=15000.0, parent_id=parent.id, trial_ends_at=start_trial_end())
             db.session.add(student1)
             db.session.commit()
 
@@ -69,7 +70,7 @@ def seed():
         student2_email = 'student2@test.com'
         student2 = User.query.filter_by(email=student2_email).first()
         if not student2:
-            student2 = User(email=student2_email, password_hash=pw_hash, role='student', name='Ayesha Khan', monthly_allowance=12000.0)
+            student2 = User(email=student2_email, password_hash=pw_hash, role='student', name='Ayesha Khan', monthly_allowance=12000.0, trial_ends_at=start_trial_end())
             db.session.add(student2)
             db.session.commit()
 
