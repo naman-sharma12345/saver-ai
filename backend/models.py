@@ -176,3 +176,18 @@ class Store(db.Model):
             'address': self.address,
             'average_price_level': self.average_price_level,
         }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Savings goal
+# ─────────────────────────────────────────────────────────────────────────────
+class Goal(db.Model):
+    __tablename__ = 'goals'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    name = db.Column(db.String(80), nullable=False)
+    target_amount = db.Column(db.Float, nullable=False)
+    saved_amount = db.Column(db.Float, nullable=False, default=0.0)
+    deadline = db.Column(db.Date, nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
