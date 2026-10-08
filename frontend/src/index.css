@@ -201,3 +201,6 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* Dark map: invert standard OSM tiles instead of relying on a keyed provider */
+.map-dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9); }
