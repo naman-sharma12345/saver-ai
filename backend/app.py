@@ -70,6 +70,7 @@ def create_app(config_name=None):
     from routes.ml_admin import ml_admin_bp
     from routes.billing import billing_bp
     from routes.subscriptions import subscriptions_bp
+    from routes.goals import goals_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(profile_bp, url_prefix='/api')
@@ -83,6 +84,7 @@ def create_app(config_name=None):
     app.register_blueprint(ml_admin_bp, url_prefix='/api')
     app.register_blueprint(billing_bp, url_prefix='/api/billing')
     app.register_blueprint(subscriptions_bp, url_prefix='/api')
+    app.register_blueprint(goals_bp, url_prefix='/api')
 
     # ── APScheduler – daily recommendation generation ────────────────────
     try:
