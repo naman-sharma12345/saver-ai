@@ -24,6 +24,7 @@ SaverAI is built around that moment.
 - **Weekly digest.** Last 7 days against the 7 before: total, change, a bar per day, top category, biggest spend, no-spend days, and a logging streak. Free for everyone; which subscriptions renew this week is Pro.
 - **Budget pace.** Each budget shows where it will land by month end and the daily spend that keeps you inside. Free for everyone.
 - **Teach it once.** Change a wrong category on the Expenses page and SaverAI remembers it for that merchant, for new expenses and statement imports. Your rule beats the model, and you can list and remove rules on the Profile page. Free for everyone.
+- **What if.** Slide a category down and see what you would keep each month and year, and how soon that alone fills your nearest goal. Plain arithmetic on your last 30 days. Free for everyone.
 - **Ask your money.** "How much did I spend on food this month?" Answered from your own expenses by a small local model (TF-IDF + logistic regression for intent, rules for dates and categories). Period comparisons are Pro.
 - **Bring your bank in.** Upload a CSV statement, SaverAI categorises every payment locally and skips duplicates.
 - **Goals with a finish date.** "Headphones: on track for 12 Dec. Save Rs 1,012 a month to hit your date."
@@ -175,6 +176,7 @@ Next, roughly in order:
 - [ ] Account Aggregator integration for consented bank data (needs a regulated FIU partner, see [docs/ACCOUNT_AGGREGATOR.md](docs/ACCOUNT_AGGREGATOR.md))
 - [ ] Receipt scanning
 - [x] User-taught category rules
+- [x] What-if savings simulator
 - [x] Weekly spending digest
 - [x] Budget pace warnings
 - [x] "Ask your money": plain-English questions answered by our own small intent model, no LLM
