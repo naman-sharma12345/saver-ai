@@ -62,6 +62,9 @@ class Config:
 
     # All "AI" in SaverAI is local machine learning (scikit-learn). No LLM or model API keys.
 
+    # Reject request bodies over 6 MB (a 3 MB PDF statement is about 4 MB as base64)
+    MAX_CONTENT_LENGTH = 6 * 1024 * 1024
+
     # Auth hardening
     RATELIMIT_ENABLED = os.getenv('RATELIMIT_ENABLED', '1') == '1'
     TRUST_PROXY = os.getenv('TRUST_PROXY', '0') == '1'

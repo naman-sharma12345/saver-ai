@@ -4,7 +4,7 @@ Application factory for the Student Expense Manager Flask backend.
 
 import os
 import atexit
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -142,6 +142,10 @@ def create_app(config_name=None):
         )
     except Exception as exc:
         app.logger.warning("⚠️  APScheduler setup failed: %s", exc)
+
+    @app.errorhandler(413)
+    def too_large(_e):
+        return jsonify({'error': 'That upload is too large.'}), 413
 
     # ── Health-check endpoint ────────────────────────────────────────────
     @app.route('/api/health')
