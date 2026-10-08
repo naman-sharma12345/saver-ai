@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { useNearbyStores, useExpenses, useCheaperAlternatives } from '../../hooks/useQueries';
 import { Card } from '../../components/ui/Card';
@@ -19,12 +20,13 @@ export const Stores = () => {
   const { data: storesData, isLoading: lS } = useNearbyStores({ lat: NOIDA_CENTER[0], lng: NOIDA_CENTER[1], radius: 10 }, true);
   const { data: expensesData, isLoading: lE } = useExpenses();
   const cheaperMutation = useCheaperAlternatives();
+  const navigate = useNavigate();
 
   const handleFindCheaper = (expenseId: number) => {
     setSelectedExpenseId(expenseId);
     cheaperMutation.mutate({ expenseId }, {
       onSuccess: (data) => { setAlternatives(data); toast.success(`Found ${data.alternatives?.length || 0} alternatives!`); },
-      onError: () => { toast.error("No alternatives found"); }
+      onError: (e: any) => { if (e?.response?.status === 402) navigate('/pricing'); else toast.error("No alternatives found"); }
     });
   };
 
