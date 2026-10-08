@@ -49,6 +49,15 @@ export const Digest = () => {
           <p className="font-semibold mt-1">{data.no_spend_days} of 7</p>
         </div>
       </div>
+      {data.logging_streak > 0 && (
+        <div className="glass-card p-5 mt-4 flex items-center justify-between">
+          <div>
+            <p className="eyebrow">Logging streak</p>
+            <p className="font-semibold mt-1">{data.logging_streak} day{data.logging_streak === 1 ? '' : 's'} in a row</p>
+          </div>
+          <p className="text-[13px] text-ink-3 max-w-[14rem] text-right">Log something today to keep it going.</p>
+        </div>
+      )}
 
       {data.renewals_count > 0 && (
         data.renewals_locked ? (

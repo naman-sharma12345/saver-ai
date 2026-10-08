@@ -21,7 +21,7 @@ SaverAI is built around that moment.
 
 - **Allowance runway.** "You have Rs 12,000 left, about Rs 522 a day for the next 23 days."
 - **Parent check-ins.** Parents can send a linked student a friendly allowance reminder by email (one per child every 6 hours, optional note).
-- **Weekly digest.** Last 7 days against the 7 before: total, change, a bar per day, top category, biggest spend, no-spend days. Free for everyone; which subscriptions renew this week is Pro.
+- **Weekly digest.** Last 7 days against the 7 before: total, change, a bar per day, top category, biggest spend, no-spend days, and a logging streak. Free for everyone; which subscriptions renew this week is Pro.
 - **Budget pace.** Each budget shows where it will land by month end and the daily spend that keeps you inside. Free for everyone.
 - **Ask your money.** "How much did I spend on food this month?" Answered from your own expenses by a small local model (TF-IDF + logistic regression for intent, rules for dates and categories). Period comparisons are Pro.
 - **Bring your bank in.** Upload a CSV statement, SaverAI categorises every payment locally and skips duplicates.
