@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useExpenses, useDeleteExpense, useCreateExpense } from '../../hooks/useQueries';
+import { useExpenses, useDeleteExpense, useCreateExpense, useUpdateExpense } from '../../hooks/useQueries';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -24,6 +24,7 @@ export const Expenses = () => {
   const { data, isLoading } = useExpenses();
   const deleteMutation = useDeleteExpense();
   const createMutation = useCreateExpense();
+  const updateMutation = useUpdateExpense();
 
   const [formData, setFormData] = useState({ amount: '', description: '', store_name: '', category: '', date: '' });
 
@@ -116,7 +117,18 @@ export const Expenses = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[15px] font-medium text-ink truncate tracking-[-0.011em]">{expense.description}</p>
-                        <p className="text-[13px] text-ink-2 truncate mt-0.5">{expense.store_name} &middot; {expense.category}</p>
+                        <p className="text-[13px] text-ink-2 truncate mt-0.5">
+                          {expense.store_name} &middot;{' '}
+                          <select
+                            value={expense.category}
+                            aria-label={`Category for ${expense.description}`}
+                            title="Wrong category? Change it and SaverAI remembers it for this merchant"
+                            onChange={(e) => updateMutation.mutate({ id: expense.id, data: { category: e.target.value } })}
+                            className="bg-transparent text-ink-2 cursor-pointer hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/40 rounded"
+                          >
+                            {Array.from(new Set([...Object.keys(CATEGORY_COLORS), expense.category])).map((c) => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </p>
                       </div>
                       <p className="text-[15px] font-medium text-ink tabular-nums flex-shrink-0">{formatCurrency(expense.amount)}</p>
                       <button
