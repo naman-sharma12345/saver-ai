@@ -11,6 +11,7 @@ export interface WeeklyDigest {
   top_category: { name: string; amount: number } | null;
   biggest_expense: { description: string; amount: number; category: string } | null;
   upcoming_renewals: { merchant: string; amount: number; date: string }[];
+  logging_streak: number;
   renewals_count: number;
   renewals_locked: boolean;
 }
