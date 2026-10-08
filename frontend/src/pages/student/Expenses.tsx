@@ -25,7 +25,7 @@ export const Expenses = () => {
   const deleteMutation = useDeleteExpense();
   const createMutation = useCreateExpense();
 
-  const [formData, setFormData] = useState({ amount: '', description: '', store_name: '', category: '' });
+  const [formData, setFormData] = useState({ amount: '', description: '', store_name: '', category: '', date: '' });
 
   const handleDelete = (id: number) => {
     if (window.confirm('Delete this expense?')) deleteMutation.mutate(id);
@@ -35,8 +35,8 @@ export const Expenses = () => {
     e.preventDefault();
     if (!formData.amount || !formData.description || !formData.store_name) return toast.error('Fill all required fields');
     createMutation.mutate(
-      { amount: parseFloat(formData.amount), description: formData.description, store_name: formData.store_name, category: formData.category || undefined },
-      { onSuccess: () => { setIsAddModalOpen(false); setFormData({ amount: '', description: '', store_name: '', category: '' }); } }
+      { amount: parseFloat(formData.amount), description: formData.description, store_name: formData.store_name, category: formData.category || undefined, date: formData.date || undefined },
+      { onSuccess: () => { setIsAddModalOpen(false); setFormData({ amount: '', description: '', store_name: '', category: '', date: '' }); } }
     );
   };
 
@@ -141,6 +141,7 @@ export const Expenses = () => {
           <Input label="Amount (₹)" type="number" placeholder="0.00" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required autoFocus />
           <Input label="Description" placeholder="e.g. Lunch at canteen" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required />
           <Input label="Store" placeholder="e.g. Amul Canteen" value={formData.store_name} onChange={(e) => setFormData({ ...formData, store_name: e.target.value })} required icon={<MapPin size={14} />} />
+          <Input label="Date (optional, defaults to today)" type="date" max={new Date().toISOString().slice(0, 10)} value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
 
           <div className="relative">
             <Input label="Category (Optional)" placeholder="Leave blank for AI" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} hint="Powered by ML auto-categorization" />
