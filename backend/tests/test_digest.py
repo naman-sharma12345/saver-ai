@@ -47,3 +47,11 @@ def test_endpoint(client, auth_headers):
     b = r.get_json()
     assert {'headline', 'total', 'daily', 'upcoming_renewals', 'renewals_locked'} <= set(b)
     assert client.get('/api/digest/weekly').status_code == 401
+
+
+def test_logging_streak():
+    from ml.digest import logging_streak
+    assert logging_streak([_e(10, 0), _e(10, 1), _e(10, 2), _e(10, 4)], TODAY) == 3
+    assert logging_streak([_e(10, 1), _e(10, 2)], TODAY) == 2   # today not logged yet: streak still alive
+    assert logging_streak([_e(10, 2)], TODAY) == 0
+    assert logging_streak([], TODAY) == 0
