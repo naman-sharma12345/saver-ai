@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
 import { authApi } from '../../api/auth';
 import toast from 'react-hot-toast';
+import { CategoryRules } from '../../components/CategoryRules';
 
 export const Profile = () => {
   const { data, isLoading } = useProfile();
@@ -95,6 +96,8 @@ export const Profile = () => {
           Save changes
         </Button>
       </motion.form>
+
+      {user?.role === 'student' && <CategoryRules />}
 
       <section className="mt-12 space-y-3">
         <h2 className="text-[21px] font-semibold tracking-[-0.022em] text-ink">Your data</h2>
