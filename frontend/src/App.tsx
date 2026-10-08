@@ -13,6 +13,7 @@ const Pricing = React.lazy(() => import('./pages/Pricing').then(m => ({ default:
 const Privacy = React.lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })));
 const ImportStatement = React.lazy(() => import('./pages/student/ImportStatement').then(m => ({ default: m.ImportStatement })));
 const Digest = React.lazy(() => import('./pages/student/Digest').then(m => ({ default: m.Digest })));
+const WhatIf = React.lazy(() => import('./pages/student/WhatIf').then(m => ({ default: m.WhatIf })));
 const Ask = React.lazy(() => import('./pages/student/Ask').then(m => ({ default: m.Ask })));
 const Goals = React.lazy(() => import('./pages/student/Goals').then(m => ({ default: m.Goals })));
 const Subscriptions = React.lazy(() => import('./pages/student/Subscriptions').then(m => ({ default: m.Subscriptions })));
@@ -135,6 +136,7 @@ function App() {
                 <Route path="/stores" element={<ProtectedRoute allowedRole="student"><Stores /></ProtectedRoute>} />
                 <Route path="/import" element={<ProtectedRoute allowedRole="student"><ImportStatement /></ProtectedRoute>} />
                 <Route path="/digest" element={<ProtectedRoute allowedRole="student"><Digest /></ProtectedRoute>} />
+                <Route path="/whatif" element={<ProtectedRoute allowedRole="student"><WhatIf /></ProtectedRoute>} />
                 <Route path="/ask" element={<ProtectedRoute allowedRole="student"><Ask /></ProtectedRoute>} />
                 <Route path="/goals" element={<ProtectedRoute allowedRole="student"><Goals /></ProtectedRoute>} />
                 <Route path="/subscriptions" element={<ProtectedRoute allowedRole="student"><Subscriptions /></ProtectedRoute>} />
