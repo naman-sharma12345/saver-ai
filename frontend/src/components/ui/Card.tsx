@@ -10,16 +10,11 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     const variants: Record<string, string> = {
       default: 'glass-card',
       elevated: 'glass-elevated',
-      gradient: 'glass-card bg-gradient-to-br from-white/[0.06] to-white/[0.02]',
-      interactive: 'glass-card hover:border-white/[0.12] hover:bg-white/[0.05] transition-all duration-300 cursor-pointer',
+      gradient: 'glass-card',
+      interactive: 'glass-card cursor-pointer hover:-translate-y-0.5',
     };
-
     return (
-      <div
-        ref={ref}
-        className={cn(variants[variant], className)}
-        {...props}
-      >
+      <div ref={ref} className={cn(variants[variant], className)} {...props}>
         {children}
       </div>
     );
