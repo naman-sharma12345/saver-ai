@@ -5,14 +5,24 @@ import { Card } from '../../components/ui/Card';
 import { Loader } from '../../components/ui/Loader';
 import { formatCurrency } from '../../utils/formatters';
 import { Lightbulb, Check, X, Sparkles } from 'lucide-react';
-import { FeatureGate } from '../../components/billing/Paywall';
+import { Paywall } from '../../components/billing/Paywall';
 import toast from 'react-hot-toast';
 
-export const Recommendations = () => (
-  <FeatureGate feature="ai_insights" title="Smart Tips are part of Pro" body="Personalised saving tips from SaverAI's own machine learning models. Start Pro to unlock them.">
-    <RecommendationsInner />
-  </FeatureGate>
-);
+export const Recommendations = () => {
+  const { data } = useRecommendations();
+  const more = (data?.total ?? 0) - (data?.recommendations?.length ?? 0);
+  return (
+    <div className="space-y-8">
+      <RecommendationsInner />
+      {data?.locked && more > 0 && (
+        <Paywall
+          title={`${more} more tip${more === 1 ? '' : 's'} waiting`}
+          body={`Free shows one tip a day. Pro unlocks all of them${data.total_potential_savings ? ', worth up to ' + formatCurrency(data.total_potential_savings) + ' in savings' : ''}.`}
+        />
+      )}
+    </div>
+  );
+};
 
 const RecommendationsInner = () => {
   const { data, isLoading } = useRecommendations();
