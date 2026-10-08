@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../api/auth';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const Login = () => {
@@ -35,55 +35,47 @@ export const Login = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="glass-elevated p-8 relative overflow-hidden">
-        {/* Subtle top accent gradient */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
-
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 mx-auto bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/25 mb-5">
-            <span className="text-white font-bold text-2xl">S</span>
-          </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Welcome back</h1>
-          <p className="text-slate-500 text-sm mt-1.5">Sign in to your SaverAI account</p>
+      <div className="text-center mb-10">
+        <div className="w-12 h-12 mx-auto bg-[#1d1d1f] rounded-[14px] flex items-center justify-center mb-8">
+          <span className="text-[#fff] font-semibold text-xl tracking-tight">S</span>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            icon={<Mail size={16} />}
-            required
-          />
-          <Input
-            label="Password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            icon={<Lock size={16} />}
-            required
-          />
-
-          <Button type="submit" className="w-full mt-2" isLoading={isLoading} glow>
-            Sign in
-            <ArrowRight size={16} />
-          </Button>
-        </form>
-
-        <p className="text-center mt-6 text-sm text-slate-600">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
-            Create one
-          </Link>
-        </p>
+        <h1 className="text-[34px] leading-[1.1] font-semibold text-[#1d1d1f] tracking-[-0.034em]">Sign in to SaverAI</h1>
+        <p className="text-[#6e6e73] text-[17px] mt-3 tracking-[-0.016em]">Know where your money goes.</p>
       </div>
+
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <Input
+          type="email"
+          placeholder="Email"
+          aria-label="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <Input
+          type="password"
+          placeholder="Password"
+          aria-label="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <Button type="submit" size="lg" className="w-full !mt-6" isLoading={isLoading}>
+          Continue
+          <ArrowRight size={16} />
+        </Button>
+      </form>
+
+      <p className="text-center mt-8 text-[14px] text-[#6e6e73]">
+        New to SaverAI?{' '}
+        <Link to="/register" className="text-[#0071e3] hover:underline font-medium">
+          Create an account
+        </Link>
+      </p>
     </motion.div>
   );
 };

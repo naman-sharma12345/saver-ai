@@ -6,9 +6,9 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { formatCurrency } from '../../utils/formatters';
-import { format } from 'date-fns';
+import { format, isToday, isYesterday } from 'date-fns';
 import { Loader } from '../../components/ui/Loader';
-import { Plus, Trash2, Tag, MapPin, Receipt, Search, Sparkles } from 'lucide-react';
+import { Plus, Trash2, MapPin, Receipt, Search, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -49,80 +49,92 @@ export const Expenses = () => {
     e.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Group by day, newest first
+  const groups: { label: string; items: any[] }[] = [];
+  filtered.forEach((e: any) => {
+    const d = new Date(e.created_at);
+    const label = isToday(d) ? 'Today' : isYesterday(d) ? 'Yesterday' : format(d, 'EEEE, d MMMM');
+    const last = groups[groups.length - 1];
+    if (last && last.label === label) last.items.push(e);
+    else groups.push({ label, items: [e] });
+  });
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Expenses</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{expenses.length} transactions recorded</p>
+          <p className="eyebrow">{expenses.length} transactions</p>
+          <h1 className="display-title mt-2">Expenses</h1>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} glow>
-          <Plus size={16} />
-          Add Expense
+        <Button onClick={() => setIsAddModalOpen(true)}>
+          <Plus size={16} strokeWidth={2.4} />
+          Add expense
         </Button>
       </div>
 
-      {/* Search */}
       <Input
-        placeholder="Search by description, store, or category..."
+        placeholder="Search expenses"
+        aria-label="Search expenses"
         icon={<Search size={16} />}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* List */}
-      <div className="space-y-2">
-        <AnimatePresence>
-          {filtered.length === 0 ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 text-slate-600">
-              <Receipt size={40} className="mb-4 opacity-30" />
-              <p className="text-sm">No expenses found.</p>
-            </motion.div>
-          ) : (
-            filtered.map((expense: any, idx: number) => (
-              <motion.div
-                key={expense.id}
-                layout
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ delay: idx * 0.03, duration: 0.3 }}
-              >
-                <Card variant="interactive" className="p-4 flex items-center gap-4">
-                  {/* Category dot */}
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: `${CATEGORY_COLORS[expense.category] || '#64748b'}15` }}
-                  >
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[expense.category] || '#64748b' }} />
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{expense.description}</p>
-                    <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-600">
-                      <span className="flex items-center gap-1"><Tag size={10} />{expense.category}</span>
-                      <span className="flex items-center gap-1 truncate"><MapPin size={10} />{expense.store_name}</span>
-                    </div>
-                  </div>
-
-                  {/* Amount & Date */}
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-semibold text-white tabular-nums">{formatCurrency(expense.amount)}</p>
-                    <p className="text-[11px] text-slate-600 mt-0.5">{format(new Date(expense.created_at), 'MMM d')}</p>
-                  </div>
-
-                  {/* Delete */}
-                  <button onClick={() => handleDelete(expense.id)} className="p-1.5 rounded-lg text-slate-700 hover:text-red-400 hover:bg-red-500/[0.06] transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0">
-                    <Trash2 size={14} />
-                  </button>
-                </Card>
-              </motion.div>
-            ))
-          )}
-        </AnimatePresence>
-      </div>
+      {filtered.length === 0 ? (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center text-center py-24">
+          <div className="w-14 h-14 rounded-full bg-black/[0.05] flex items-center justify-center mb-6">
+            <Receipt size={24} strokeWidth={1.6} className="text-[#6e6e73]" />
+          </div>
+          <p className="text-[21px] font-semibold tracking-[-0.022em] text-[#1d1d1f]">
+            {searchTerm ? 'No matches' : 'No expenses yet'}
+          </p>
+          <p className="text-[15px] text-[#6e6e73] mt-2 max-w-xs">
+            {searchTerm ? 'Try a different word.' : 'Add your first expense and SaverAI will sort it into a category for you.'}
+          </p>
+        </motion.div>
+      ) : (
+        <div className="space-y-10">
+          {groups.map((g) => (
+            <section key={g.label}>
+              <h2 className="text-[13px] font-medium text-[#6e6e73] mb-3 px-1">{g.label}</h2>
+              <Card className="overflow-hidden !rounded-[20px]">
+                <AnimatePresence initial={false}>
+                  {g.items.map((expense: any) => (
+                    <motion.div
+                      key={expense.id}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="group flex items-center gap-4 px-6 py-4 border-b border-black/[0.06] last:border-b-0 hover:bg-black/[0.02] transition-colors"
+                    >
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[15px] font-semibold"
+                        style={{ backgroundColor: 'rgba(0,0,0,0.05)', color: '#1d1d1f' }}
+                      >
+                        {expense.category?.charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[15px] font-medium text-[#1d1d1f] truncate tracking-[-0.011em]">{expense.description}</p>
+                        <p className="text-[13px] text-[#6e6e73] truncate mt-0.5">{expense.store_name} &middot; {expense.category}</p>
+                      </div>
+                      <p className="text-[15px] font-medium text-[#1d1d1f] tabular-nums flex-shrink-0">{formatCurrency(expense.amount)}</p>
+                      <button
+                        onClick={() => handleDelete(expense.id)}
+                        aria-label="Delete expense"
+                        className="p-2 -mr-2 rounded-full text-[#86868b] hover:text-[#d70015] hover:bg-[#ff3b30]/10 transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100 flex-shrink-0"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </Card>
+            </section>
+          ))}
+        </div>
+      )}
 
       {/* Add Modal */}
       <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="New Expense" subtitle="AI will auto-categorize if you leave category blank">
@@ -133,7 +145,7 @@ export const Expenses = () => {
 
           <div className="relative">
             <Input label="Category (Optional)" placeholder="Leave blank for AI" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} hint="Powered by ML auto-categorization" />
-            <Sparkles size={14} className="absolute right-3 top-9 text-cyan-500/40" />
+            <Sparkles size={14} className="absolute right-3 top-9 text-[#86868b]" />
           </div>
 
           <div className="flex justify-end gap-3 pt-2">

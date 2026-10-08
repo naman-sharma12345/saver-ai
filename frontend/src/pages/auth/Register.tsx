@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { authApi } from '../../api/auth';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { User, Mail, Lock, IndianRupee, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const Register = () => {
@@ -41,55 +41,48 @@ export const Register = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="glass-elevated p-8 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
+      <div className="text-center mb-10">
+        <div className="w-12 h-12 mx-auto bg-[#1d1d1f] rounded-[14px] flex items-center justify-center mb-8">
+          <span className="text-[#fff] font-semibold text-xl tracking-tight">S</span>
+        </div>
+        <h1 className="text-[34px] leading-[1.1] font-semibold text-[#1d1d1f] tracking-[-0.034em]">Create your account</h1>
+        <p className="text-[#6e6e73] text-[17px] mt-3 tracking-[-0.016em]">It takes less than a minute.</p>
+      </div>
 
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-white tracking-tight">Create account</h1>
-          <p className="text-slate-500 text-sm mt-1.5">Start your financial journey with AI</p>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <Input name="name" aria-label="Full name" placeholder="Full name" value={formData.name} onChange={handleChange} required />
+        <Input name="email" type="email" aria-label="Email" placeholder="Email" value={formData.email} onChange={handleChange} required />
+        <Input name="password" type="password" aria-label="Password" placeholder="Password" value={formData.password} onChange={handleChange} required />
+
+        <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-black/[0.05] !mt-5">
+          {['student', 'parent'].map(role => (
+            <label key={role} className="cursor-pointer">
+              <input type="radio" name="role" value={role} checked={formData.role === role} onChange={handleChange} className="peer sr-only" />
+              <div className="h-10 flex items-center justify-center rounded-[9px] text-[14px] font-medium text-[#6e6e73] transition-all peer-checked:bg-[#fff] peer-checked:text-[#1d1d1f] peer-checked:shadow-sm capitalize">
+                {role}
+              </div>
+            </label>
+          ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Full Name" name="name" placeholder="John Doe" value={formData.name} onChange={handleChange} icon={<User size={16} />} required />
-          <Input label="Email" name="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleChange} icon={<Mail size={16} />} required />
-          <Input label="Password" name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} icon={<Lock size={16} />} required />
+        {formData.role === 'student' && (
+          <Input label="" name="monthly_allowance" type="number" aria-label="Monthly allowance" placeholder="Monthly allowance (₹)" value={formData.monthly_allowance} onChange={handleChange} />
+        )}
 
-          {/* Role toggle */}
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-slate-400">Role</label>
-            <div className="grid grid-cols-2 gap-2">
-              {['student', 'parent'].map(role => (
-                <label key={role} className="cursor-pointer">
-                  <input type="radio" name="role" value={role} checked={formData.role === role} onChange={handleChange} className="peer sr-only" />
-                  <div className="p-2.5 text-center rounded-xl border border-white/[0.06] text-sm font-medium text-slate-500 transition-all peer-checked:border-cyan-500/40 peer-checked:text-cyan-400 peer-checked:bg-cyan-500/[0.06] hover:bg-white/[0.03] capitalize">
-                    {role}
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
+        <Button type="submit" size="lg" className="w-full !mt-6" isLoading={isLoading}>
+          Create account
+          <ArrowRight size={16} />
+        </Button>
+      </form>
 
-          {formData.role === 'student' && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-              <Input label="Monthly Allowance (₹)" name="monthly_allowance" type="number" placeholder="15000" value={formData.monthly_allowance} onChange={handleChange} icon={<IndianRupee size={16} />} />
-            </motion.div>
-          )}
-
-          <Button type="submit" className="w-full mt-2" isLoading={isLoading} glow>
-            Create Account
-            <ArrowRight size={16} />
-          </Button>
-        </form>
-
-        <p className="text-center mt-6 text-sm text-slate-600">
-          Already have an account?{' '}
-          <Link to="/login" className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors">Sign in</Link>
-        </p>
-      </div>
+      <p className="text-center mt-8 text-[14px] text-[#6e6e73]">
+        Already have an account?{' '}
+        <Link to="/login" className="text-[#0071e3] hover:underline font-medium">Sign in</Link>
+      </p>
     </motion.div>
   );
 };

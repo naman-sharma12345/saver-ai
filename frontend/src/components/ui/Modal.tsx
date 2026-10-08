@@ -40,7 +40,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, subtitle, 
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/30 backdrop-blur-md"
           />
           {/* Modal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
@@ -51,7 +51,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, subtitle, 
               transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
               className={cn(
                 'w-full pointer-events-auto',
-                'bg-[#0f1629] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/50',
+                'bg-[#fff] rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.18)]',
                 sizes[size],
                 className
               )}
@@ -59,7 +59,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, subtitle, 
               {/* Header */}
               <div className="flex items-start justify-between px-6 pt-6 pb-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-white">{title}</h2>
+                  <h2 className="text-[22px] font-semibold tracking-tight text-[#1d1d1f]">{title}</h2>
                   {subtitle && <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>}
                 </div>
                 <button

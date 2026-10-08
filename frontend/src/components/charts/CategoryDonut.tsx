@@ -7,13 +7,13 @@ interface CategoryDonutProps {
   totalAmount: number;
 }
 
-const COLORS = ['#22d3ee', '#6366f1', '#ec4899', '#f59e0b', '#10b981', '#8b5cf6', '#f43f5e', '#06b6d4'];
+const COLORS = ['#1d1d1f', '#0071e3', '#5ac8fa', '#a1a1a6', '#30a14e', '#ff9f0a', '#bf5af2', '#d2d2d7'];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[#111827] border border-white/[0.08] rounded-xl px-4 py-3 shadow-2xl">
-      <p className="text-xs text-slate-400 mb-0.5">{payload[0].name}</p>
+    <div className="bg-[#fff] rounded-2xl px-4 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
+      <p className="text-xs text-[#6e6e73] mb-0.5">{payload[0].name}</p>
       <p className="text-sm font-semibold text-white">{formatCurrency(payload[0].value)}</p>
     </div>
   );

@@ -40,7 +40,7 @@ export const Health = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Financial Health</h1>
+        <h1 className="display-title">Financial Health</h1>
         <p className="text-sm text-slate-500 mt-0.5">Your AI-calculated wellness score and breakdown.</p>
       </div>
 

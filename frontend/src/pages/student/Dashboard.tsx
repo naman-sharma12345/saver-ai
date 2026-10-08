@@ -1,8 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../../components/ui/Card';
-import { HealthGauge } from '../../components/charts/HealthGauge';
-import { CategoryDonut } from '../../components/charts/CategoryDonut';
 import { SpendingTrend } from '../../components/charts/SpendingTrend';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -14,20 +12,25 @@ import {
 } from '../../hooks/useQueries';
 import { formatCurrency } from '../../utils/formatters';
 import { Loader } from '../../components/ui/Loader';
-import {
-  AlertTriangle, TrendingDown, TrendingUp,
-  Wallet, Target, Brain, ArrowUpRight, ArrowDownRight, Sparkles
-} from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 const fadeUp = (delay: number = 0) => ({
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 14 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] as any },
+  transition: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] as any },
 });
+
+const greeting = () => {
+  const h = new Date().getHours();
+  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+};
+
+const scoreWord = (s: number) => (s >= 80 ? 'Excellent' : s >= 65 ? 'Good' : s >= 50 ? 'Fair' : 'Needs attention');
 
 export const Dashboard = () => {
   const { user } = useAuth();
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const now = new Date();
+  const currentMonth = now.toISOString().slice(0, 7);
 
   const { data: healthData, isLoading: lH } = useHealthScore();
   const { data: categoryData, isLoading: lC } = useSpendingByCategory(currentMonth);
@@ -41,156 +44,132 @@ export const Dashboard = () => {
   const allowance = user?.monthly_allowance || 0;
   const remaining = Math.max(0, allowance - totalSpent);
   const spendRatio = allowance > 0 ? Math.min((totalSpent / allowance) * 100, 100) : 0;
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysLeft = Math.max(1, daysInMonth - now.getDate() + 1);
+  const perDay = remaining / daysLeft;
+  const score = healthData?.score || 0;
+  const rising = predictionData?.trend === 'increasing';
+  const barColor = spendRatio > 90 ? '#ff3b30' : spendRatio > 70 ? '#ff9f0a' : '#1d1d1f';
+  const breakdown: any[] = categoryData?.breakdown || [];
+  const maxCat = Math.max(1, ...breakdown.map((b: any) => b.total));
+  const dateLabel = now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Header */}
       <motion.div {...fadeUp()}>
-        <div className="flex items-end justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">
-              Hello, {user?.name?.split(' ')[0]}
-            </h1>
-            <p className="text-slate-500 text-sm mt-1">Here's your financial pulse for this month.</p>
-          </div>
-          <div className="hidden sm:flex items-center gap-2 text-xs text-slate-600 bg-white/[0.03] border border-white/[0.06] rounded-full px-3 py-1.5">
-            <Sparkles size={12} className="text-cyan-500" />
-            <span>AI-Powered Insights</span>
-          </div>
-        </div>
+        <p className="eyebrow">{dateLabel}</p>
+        <h1 className="display-title mt-2">
+          {greeting()}, {user?.name?.split(' ')[0]}.
+        </h1>
       </motion.div>
 
-      {/* Anomaly Alert */}
-      {anomaliesData?.anomalies?.length > 0 && (
-        <motion.div {...fadeUp(0.1)}>
-          <div className="relative overflow-hidden rounded-2xl border border-red-500/20 bg-red-500/[0.04] p-4 flex items-center gap-4">
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-500/40 to-transparent" />
-            <div className="p-2.5 bg-red-500/10 rounded-xl text-red-400 animate-pulse-glow">
-              <AlertTriangle size={20} />
+      {/* Hero */}
+      <motion.div {...fadeUp(0.08)}>
+        <Card className="p-8 lg:p-12">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-0">
+            <div className="lg:col-span-3 lg:pr-12">
+              <p className="eyebrow">Left to spend this month</p>
+              <p className="display-number text-[56px] sm:text-[80px] mt-4 text-[#1d1d1f]">{formatCurrency(remaining)}</p>
+              <p className="text-[17px] text-[#6e6e73] mt-4 tracking-[-0.016em]">
+                {remaining > 0 ? (
+                  <>That's about <span className="text-[#1d1d1f] font-medium">{formatCurrency(perDay)}</span> a day for the next {daysLeft} days.</>
+                ) : (
+                  <>You've used your full allowance for this month.</>
+                )}
+              </p>
+              <div className="mt-8">
+                <div className="h-1.5 bg-black/[0.07] rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${spendRatio}%` }}
+                    transition={{ duration: 1.4, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: barColor }}
+                  />
+                </div>
+                <div className="flex justify-between mt-3 text-[13px] text-[#6e6e73]">
+                  <span>{formatCurrency(totalSpent)} spent</span>
+                  <span>{formatCurrency(allowance)} allowance</span>
+                </div>
+              </div>
             </div>
+
+            <div className="lg:col-span-2 lg:pl-12 lg:border-l border-black/[0.07] flex flex-col justify-center divide-y divide-black/[0.07]">
+              <div className="pb-6">
+                <p className="eyebrow">Forecast for next month</p>
+                <div className="flex items-baseline gap-3 mt-2">
+                  <span className="display-number text-[32px]">{formatCurrency(predictionData?.predicted_amount || 0)}</span>
+                  <span className={`inline-flex items-center gap-0.5 text-[13px] font-medium ${rising ? 'text-[#d70015]' : 'text-[#248a3d]'}`}>
+                    {rising ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                    {rising ? 'Rising' : 'Falling'}
+                  </span>
+                </div>
+              </div>
+              <div className="pt-6">
+                <p className="eyebrow">Financial health</p>
+                <div className="flex items-baseline gap-3 mt-2">
+                  <span className="display-number text-[32px]">{score}</span>
+                  <span className="text-[15px] text-[#6e6e73]">{scoreWord(score)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+
+      {/* Anomaly */}
+      {anomaliesData?.anomalies?.length > 0 && (
+        <motion.div {...fadeUp(0.14)}>
+          <div className="flex items-start gap-4 rounded-[20px] bg-[#fff8eb] px-6 py-5">
+            <span className="mt-[7px] w-2 h-2 rounded-full bg-[#ff9f0a] flex-shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-red-400">Unusual spending detected</p>
-              <p className="text-xs text-red-400/60 mt-0.5">{anomaliesData.message}</p>
+              <p className="text-[15px] font-semibold text-[#1d1d1f] tracking-tight">Unusual spending detected</p>
+              <p className="text-[14px] text-[#6e6e73] mt-1 leading-relaxed">{anomaliesData.message}</p>
             </div>
           </div>
         </motion.div>
       )}
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Spent This Month */}
-        <motion.div {...fadeUp(0.1)}>
-          <Card className="p-5 group relative overflow-hidden">
-            <div className="absolute -top-4 -right-4 text-white/[0.02] group-hover:text-white/[0.04] transition-colors">
-              <Wallet size={80} />
-            </div>
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Spent</p>
-            <h3 className="text-2xl font-bold text-white mt-2 tabular-nums">
-              {formatCurrency(totalSpent)}
-            </h3>
-            <div className="mt-3">
-              <div className="flex items-center justify-between text-[11px] mb-1.5">
-                <span className="text-slate-600">{spendRatio.toFixed(0)}% of allowance</span>
-              </div>
-              <div className="h-1 bg-white/[0.04] rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${spendRatio}%` }}
-                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                  className={`h-full rounded-full ${spendRatio > 90 ? 'bg-red-500' : spendRatio > 70 ? 'bg-amber-500' : 'bg-cyan-500'}`}
-                />
-              </div>
-            </div>
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <motion.div {...fadeUp(0.2)} className="lg:col-span-3">
+          <Card className="h-full p-8">
+            <h2 className="text-[21px] font-semibold tracking-[-0.022em] text-[#1d1d1f]">Spending</h2>
+            <p className="text-[14px] text-[#6e6e73] mt-1">Last 6 months</p>
+            <div className="mt-8"><SpendingTrend data={trendData?.spending_over_time || []} /></div>
           </Card>
         </motion.div>
 
-        {/* Remaining */}
-        <motion.div {...fadeUp(0.15)}>
-          <Card className="p-5 group relative overflow-hidden">
-            <div className="absolute -top-4 -right-4 text-white/[0.02] group-hover:text-white/[0.04] transition-colors">
-              <Target size={80} />
-            </div>
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Remaining</p>
-            <h3 className="text-2xl font-bold text-white mt-2 tabular-nums">
-              {formatCurrency(remaining)}
-            </h3>
-            <div className="mt-3 flex items-center gap-1.5">
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${remaining > 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-                {remaining > 0 ? 'On track' : 'Over budget'}
-              </span>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* AI Prediction */}
-        <motion.div {...fadeUp(0.2)}>
-          <Card className="p-5 group relative overflow-hidden">
-            <div className="absolute -top-4 -right-4 text-white/[0.02] group-hover:text-white/[0.04] transition-colors">
-              <Brain size={80} />
-            </div>
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">AI Forecast</p>
-            <h3 className="text-2xl font-bold text-white mt-2 tabular-nums">
-              {formatCurrency(predictionData?.predicted_amount || 0)}
-            </h3>
-            <div className="mt-3 flex items-center gap-1.5">
-              {predictionData?.trend === 'increasing' ? (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 flex items-center gap-1">
-                  <ArrowUpRight size={12} /> Rising
-                </span>
-              ) : (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 flex items-center gap-1">
-                  <ArrowDownRight size={12} /> Falling
-                </span>
-              )}
-              <span className="text-[10px] text-slate-600">Next month</span>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Health Score */}
-        <motion.div {...fadeUp(0.25)}>
-          <Card className="p-5 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Health Score</p>
-            <HealthGauge score={healthData?.score || 0} />
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <motion.div {...fadeUp(0.3)} className="lg:col-span-3">
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm font-semibold text-white">Spending Trend</h3>
-              <span className="text-[11px] text-slate-600">Last 6 months</span>
-            </div>
-            <SpendingTrend data={trendData?.spending_over_time || []} />
-          </Card>
-        </motion.div>
-
-        <motion.div {...fadeUp(0.35)} className="lg:col-span-2">
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-white">Categories</h3>
-              <span className="text-[11px] text-slate-600">{currentMonth}</span>
-            </div>
-            {categoryData?.breakdown?.length > 0 ? (
-              <>
-                <CategoryDonut data={categoryData.breakdown} totalAmount={categoryData.grand_total} />
-                {/* Legend */}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-4">
-                  {categoryData.breakdown.slice(0, 6).map((item: any, i: number) => (
-                    <div key={item.category} className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ['#22d3ee', '#6366f1', '#ec4899', '#f59e0b', '#10b981', '#8b5cf6'][i % 6] }} />
-                      <span className="text-[11px] text-slate-500 truncate">{item.category}</span>
-                      <span className="text-[11px] text-slate-400 ml-auto tabular-nums">{formatCurrency(item.total)}</span>
+        <motion.div {...fadeUp(0.26)} className="lg:col-span-2">
+          <Card className="h-full p-8">
+            <h2 className="text-[21px] font-semibold tracking-[-0.022em] text-[#1d1d1f]">Where it went</h2>
+            <p className="text-[14px] text-[#6e6e73] mt-1">This month</p>
+            {breakdown.length > 0 ? (
+              <ul className="mt-8 space-y-5">
+                {breakdown.slice(0, 6).map((item: any, i: number) => (
+                  <li key={item.category}>
+                    <div className="flex items-baseline justify-between text-[14px]">
+                      <span className="text-[#1d1d1f] font-medium">{item.category}</span>
+                      <span className="text-[#6e6e73] tabular-nums">{formatCurrency(item.total)}</span>
                     </div>
-                  ))}
-                </div>
-              </>
+                    <div className="mt-2 h-1 bg-black/[0.06] rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(item.total / maxCat) * 100}%` }}
+                        transition={{ duration: 1, delay: 0.3 + i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                        className="h-full rounded-full bg-[#1d1d1f]"
+                        style={{ opacity: Math.max(0.28, 1 - i * 0.14) }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
             ) : (
-              <div className="h-64 flex items-center justify-center text-sm text-slate-600">No data yet</div>
+              <div className="py-16 text-center">
+                <p className="text-[17px] font-semibold text-[#1d1d1f]">Nothing spent yet</p>
+                <p className="text-[14px] text-[#6e6e73] mt-1">Add an expense and it shows up here.</p>
+              </div>
             )}
           </Card>
         </motion.div>
