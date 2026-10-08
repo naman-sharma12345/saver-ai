@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Lazy loaded pages
 const Landing = React.lazy(() => import('./pages/Landing').then(m => ({ default: m.Landing })));
 const Pricing = React.lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
+const Subscriptions = React.lazy(() => import('./pages/student/Subscriptions').then(m => ({ default: m.Subscriptions })));
 const Login = React.lazy(() => import('./pages/auth/Login').then(m => ({ default: m.Login })));
 const Register = React.lazy(() => import('./pages/auth/Register').then(m => ({ default: m.Register })));
 const Dashboard = React.lazy(() => import('./pages/student/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -118,6 +119,7 @@ function App() {
                 <Route path="/health" element={<ProtectedRoute allowedRole="student"><Health /></ProtectedRoute>} />
                 <Route path="/recommendations" element={<ProtectedRoute allowedRole="student"><Recommendations /></ProtectedRoute>} />
                 <Route path="/stores" element={<ProtectedRoute allowedRole="student"><Stores /></ProtectedRoute>} />
+                <Route path="/subscriptions" element={<ProtectedRoute allowedRole="student"><Subscriptions /></ProtectedRoute>} />
                 <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/parent" element={<ProtectedRoute allowedRole="parent"><ParentDashboard /></ProtectedRoute>} />
