@@ -47,6 +47,13 @@ class Config:
         if o.strip()
     ]
 
+    # Emails allowed to use admin endpoints such as model retraining (comma-separated)
+    ADMIN_EMAILS = [
+        e.strip().lower()
+        for e in os.getenv('ADMIN_EMAILS', '').split(',')
+        if e.strip()
+    ]
+
     # External AI API Key
     AI_API_KEY = os.getenv('AI_API_KEY', '')
 

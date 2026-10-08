@@ -6,7 +6,7 @@ POST /api/ml/retrain-category  – retrain the category classifier
 import os
 import logging
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, current_app, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models import User
@@ -21,13 +21,14 @@ ml_admin_bp = Blueprint('ml_admin', __name__)
 def retrain_category_model():
     """
     Retrain the expense category classifier.
-    Restricted to admin users (for now, any parent can trigger).
+    Admin only: the caller's email must be listed in the ADMIN_EMAILS setting.
     """
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
 
-    if not user or user.role != 'parent':
-        return jsonify({'error': 'Admin / parent access required'}), 403
+    admins = current_app.config.get('ADMIN_EMAILS', [])
+    if not user or user.email.lower() not in admins:
+        return jsonify({'error': 'Admin access required'}), 403
 
     try:
         from ml.train_category_model import train_model
