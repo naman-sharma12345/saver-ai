@@ -127,6 +127,7 @@ Merged and tested is not the same as ready for real users. Before launch:
 - [ ] Legal review of the Terms, Privacy page and the under-18 consent flow. The DPDP Rules are being phased in and the email-link consent here is a draft, not settled compliance
 - [ ] Real Razorpay keys, a live webhook, and a test payment end to end
 - [ ] Run the migrations and the app against PostgreSQL and fix anything SQLite hid
+- [ ] Rate limits live in process memory. Behind several workers or servers they need a shared store such as Redis
 - [x] Daily scheduler starts in one process only (file lock, so gunicorn workers do not each run it)
 - [ ] Rotate the secrets that were committed earlier (old JWT secret and AI key remain in git history)
 - [ ] Change or delete the demo logins
@@ -186,6 +187,7 @@ Next, roughly in order:
 
 - Passwords hashed with bcrypt, 8 character minimum. JWT access and refresh tokens.
 - Rate limits on login, register and password reset. Reset links are signed, expire in one hour and work once. The forgot-password endpoint never reveals whether an email has an account.
+- Secondary text in light mode meets WCAG AA contrast (4.5:1) and every button and input has an accessible name (checked with a script across the student pages).
 - Request bodies over 6 MB are rejected, statement import is rate limited, and over-long expense fields return a clear 400 instead of a database error.
 - Production refuses to start without `JWT_SECRET_KEY`.
 - Privacy (India's DPDP Act): date of birth is collected at sign-up. Under-18s cannot use the app until a parent or guardian approves by a signed, 7-day, single-use email link; declining deletes the account. No ads and no marketing tracking. Users can download all their data or delete their account from Profile (`GET /api/auth/export`, `DELETE /api/auth/me`). The in-app Terms and Privacy page is a plain-language draft, not legal advice.
