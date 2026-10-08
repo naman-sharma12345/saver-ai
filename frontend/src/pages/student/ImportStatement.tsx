@@ -11,27 +11,37 @@ interface Preview { rows: Row[]; duplicates: number; skipped: number; total: num
 export const ImportStatement = () => {
   const qc = useQueryClient();
   const input = useRef<HTMLInputElement>(null);
-  const [csv, setCsv] = useState('');
+  const [src, setSrc] = useState<{ csv?: string; pdf_base64?: string } | null>(null);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [busy, setBusy] = useState(false);
 
   const onFile = async (file?: File) => {
     if (!file) return;
-    if (file.size > 1_000_000) return toast.error('That file is too large (1 MB max)');
-    const text = await file.text();
-    setCsv(text);
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (file.size > (isPdf ? 2_000_000 : 1_000_000)) return toast.error(`That file is too large (${isPdf ? 2 : 1} MB max)`);
+    let payload: { csv?: string; pdf_base64?: string };
+    if (isPdf) {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      payload = { pdf_base64: btoa(bin) };
+    } else {
+      payload = { csv: await file.text() };
+    }
+    setSrc(payload);
     setBusy(true);
-    try { setPreview(await expensesApi.importStatement(text, false)); }
+    try { setPreview(await expensesApi.importStatement(payload, false)); }
     catch (e: any) { setPreview(null); toast.error(e?.response?.data?.error || 'Could not read that file'); }
     finally { setBusy(false); }
   };
 
   const confirm = async () => {
+    if (!src) return;
     setBusy(true);
     try {
-      const r = await expensesApi.importStatement(csv, true);
+      const r = await expensesApi.importStatement(src, true);
       toast.success(`Imported ${r.imported} expense${r.imported === 1 ? '' : 's'}`);
-      setPreview(null); setCsv('');
+      setPreview(null); setSrc(null);
       qc.invalidateQueries();
     } catch (e: any) { toast.error(e?.response?.data?.error || 'Import failed'); }
     finally { setBusy(false); }
@@ -41,10 +51,10 @@ export const ImportStatement = () => {
     <div className="max-w-3xl">
       <p className="eyebrow">Statement import</p>
       <h1 className="display-title mt-1">Import</h1>
-      <p className="mt-3 text-ink-2 text-[17px]">Upload a CSV statement from your bank or UPI app. SaverAI reads it on our own servers, sorts each payment into a category, and skips money coming in.</p>
+      <p className="mt-3 text-ink-2 text-[17px]">Upload a CSV or PDF statement from your bank or UPI app. SaverAI reads it on our own servers, sorts each payment into a category, and skips money coming in.</p>
       <div className="glass-card p-8 mt-8 text-center">
-        <input ref={input} type="file" accept=".csv,text/csv" className="hidden" aria-label="Statement file" onChange={(e) => onFile(e.target.files?.[0])} />
-        <Button onClick={() => input.current?.click()} isLoading={busy && !preview}>Choose CSV file</Button>
+        <input ref={input} type="file" accept=".csv,.pdf,text/csv,application/pdf" className="hidden" aria-label="Statement file" onChange={(e) => onFile(e.target.files?.[0])} />
+        <Button onClick={() => input.current?.click()} isLoading={busy && !preview}>Choose statement file</Button>
         <p className="text-[13px] text-ink-3 mt-3">Needs Date, Description and Debit (or Amount) columns. Nothing is saved until you confirm.</p>
       </div>
       {preview && (
