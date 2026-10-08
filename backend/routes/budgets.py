@@ -11,7 +11,8 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app import db
-from models import Budget
+from models import Budget, Expense
+from ml.budget_pace import budget_pace
 
 budgets_bp = Blueprint('budgets', __name__)
 
@@ -150,3 +151,19 @@ def delete_budget(budget_id):
     db.session.delete(budget)
     db.session.commit()
     return jsonify({'message': 'Budget deleted successfully'}), 200
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GET /api/budgets/pace  – will each budget last the month? (free for everyone)
+# ─────────────────────────────────────────────────────────────────────────────
+@budgets_bp.route('/budgets/pace', methods=['GET'])
+@jwt_required()
+def budgets_pace():
+    user_id = int(get_jwt_identity())
+    today = datetime.now().date()
+    first = today.replace(day=1)
+    budgets = Budget.query.filter_by(user_id=user_id, month=first).all()
+    spent = {}
+    for e in Expense.query.filter(Expense.user_id == user_id, Expense.created_at >= datetime(first.year, first.month, 1)).all():
+        spent[e.category] = spent.get(e.category, 0.0) + e.amount
+    return jsonify(budget_pace([{'category': b.category, 'budget_limit': b.budget_limit} for b in budgets], spent, today)), 200

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { budgetsApi } from '../../api/services';
 import { useBudgetVsActual, useBudgets, useUpdateBudget } from '../../hooks/useQueries';
 import { Card } from '../../components/ui/Card';
 import { Loader } from '../../components/ui/Loader';
@@ -17,6 +19,8 @@ export const Budget = () => {
   const currentMonth = new Date().toISOString().slice(0, 7);
   const { data: budgetActual, isLoading: lBA } = useBudgetVsActual(currentMonth);
   const updateMutation = useUpdateBudget();
+  const { data: pace } = useQuery({ queryKey: ['budget-pace'], queryFn: budgetsApi.pace });
+  const paceFor = (c: string) => pace?.items.find((i) => i.category === c);
 
   const [editCategory, setEditCategory] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState<number>(0);
@@ -100,6 +104,17 @@ export const Budget = () => {
               <p className="text-[13px] text-ink-2 mt-2.5 tabular-nums">
                 {formatCurrency(item.actual)} of {formatCurrency(item.budget_limit)}
               </p>
+              {(() => {
+                const p = paceFor(item.category);
+                if (!p || p.status === 'ok' || p.status === 'over') return null;
+                return (
+                  <p className={`text-[13px] mt-1 ${p.status === 'overshoot' ? 'text-[#ff9f0a]' : 'text-ink-3'}`}>
+                    {p.status === 'overshoot'
+                      ? `At this pace you will reach ${formatCurrency(p.projected)}. About ${formatCurrency(p.safe_daily ?? 0)} a day keeps you inside.`
+                      : `On pace for ${formatCurrency(p.projected)}, close to the limit.`}
+                  </p>
+                );
+              })()}
             </motion.div>
           );
         })}
