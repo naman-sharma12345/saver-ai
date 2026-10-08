@@ -11,35 +11,31 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, icon, hint, ...props }, ref) => {
     return (
-      <div className="w-full space-y-1.5">
-        {label && (
-          <label className="block text-[13px] font-medium text-slate-400">
-            {label}
-          </label>
-        )}
+      <div className="w-full space-y-2">
+        {label && <label className="block text-[13px] font-medium text-[#6e6e73]">{label}</label>}
         <div className="relative group">
           {icon && (
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-400 transition-colors">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#86868b] group-focus-within:text-[#0071e3] transition-colors">
               {icon}
             </div>
           )}
           <input
             ref={ref}
             className={cn(
-              'w-full rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-100',
-              'px-4 py-2.5 text-sm transition-all duration-200 outline-none',
-              'placeholder:text-slate-600',
-              'focus:bg-white/[0.06] focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20',
-              'hover:border-white/[0.12]',
+              'w-full h-12 rounded-xl bg-black/[0.04] border border-transparent text-[#1d1d1f]',
+              'px-4 text-[15px] transition-all duration-200 outline-none',
+              'placeholder:text-[#86868b]',
+              'hover:bg-black/[0.06]',
+              'focus:bg-[#fff] focus:border-[#0071e3] focus:ring-4 focus:ring-[#0071e3]/15',
               icon && 'pl-11',
-              error && 'border-red-500/40 focus:border-red-500/60 focus:ring-red-500/20',
+              error && 'border-[#ff3b30] focus:border-[#ff3b30] focus:ring-[#ff3b30]/15',
               className
             )}
             {...props}
           />
         </div>
-        {hint && !error && <p className="text-xs text-slate-600">{hint}</p>}
-        {error && <p className="text-xs text-red-400 font-medium">{error}</p>}
+        {hint && !error && <p className="text-xs text-[#86868b]">{hint}</p>}
+        {error && <p className="text-xs text-[#d70015] font-medium">{error}</p>}
       </div>
     );
   }
