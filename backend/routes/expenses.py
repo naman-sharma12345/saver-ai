@@ -8,6 +8,7 @@ PUT    /api/expenses/<id>       – update
 DELETE /api/expenses/<id>       – delete
 """
 
+import math
 from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -18,6 +19,19 @@ from ml.categorizer import predict_category
 from ml.anomaly_detection import detect_anomalies, flag_anomalies_in_db
 
 expenses_bp = Blueprint('expenses', __name__)
+
+
+def _parse_amount(value):
+    """Return a positive finite float, or None if the value is not valid."""
+    if isinstance(value, bool):
+        return None
+    try:
+        amount = float(value)
+    except (ValueError, TypeError):
+        return None
+    if not math.isfinite(amount) or amount <= 0:
+        return None
+    return amount
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -32,7 +46,7 @@ def create_expense():
     Optional: category (auto-detected via ML if omitted), lat, lng, is_recurring.
     """
     user_id = int(get_jwt_identity())
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data:
         return jsonify({'error': 'Request body is required'}), 400
@@ -43,13 +57,9 @@ def create_expense():
     if missing:
         return jsonify({'error': f"Missing required fields: {', '.join(missing)}"}), 400
 
-    try:
-        amount = float(data['amount'])
-    except (ValueError, TypeError):
-        return jsonify({'error': 'amount must be a number'}), 400
-
-    if amount <= 0:
-        return jsonify({'error': 'amount must be positive'}), 400
+    amount = _parse_amount(data['amount'])
+    if amount is None:
+        return jsonify({'error': 'amount must be a positive number'}), 400
 
     description = str(data['description']).strip()
     store_name = str(data['store_name']).strip()
@@ -139,6 +149,8 @@ def list_expenses():
     # ── Pagination ───────────────────────────────────────────────────────
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 50, type=int)
+    page = max(page or 1, 1)
+    per_page = min(max(per_page or 50, 1), 100)
 
     query = query.order_by(Expense.created_at.desc())
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -211,15 +223,15 @@ def update_expense(expense_id):
     if expense is None:
         return jsonify({'error': 'Expense not found'}), 404
 
-    data = request.get_json()
+    data = request.get_json(silent=True)
     if not data:
         return jsonify({'error': 'Request body is required'}), 400
 
     if 'amount' in data:
-        try:
-            expense.amount = float(data['amount'])
-        except (ValueError, TypeError):
-            return jsonify({'error': 'amount must be a number'}), 400
+        amount = _parse_amount(data['amount'])
+        if amount is None:
+            return jsonify({'error': 'amount must be a positive number'}), 400
+        expense.amount = amount
 
     if 'category' in data:
         expense.category = str(data['category']).strip()
