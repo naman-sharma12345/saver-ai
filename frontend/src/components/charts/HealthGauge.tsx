@@ -32,7 +32,7 @@ export const HealthGauge: React.FC<HealthGaugeProps> = ({ score }) => {
           <circle
             cx="60" cy="60" r="54"
             fill="none"
-            stroke="rgba(0,0,0,0.06)"
+            stroke="var(--hairline)"
             strokeWidth="7"
             strokeDasharray={circumference}
             strokeDashoffset={circumference * 0.25}
@@ -53,8 +53,8 @@ export const HealthGauge: React.FC<HealthGaugeProps> = ({ score }) => {
         </svg>
         {/* Center text */}
         <div className="absolute flex flex-col items-center translate-y-1">
-          <span className="text-[44px] font-semibold tracking-[-0.04em] tabular-nums text-[#1d1d1f]" >{animatedScore}</span>
-          <span className="text-[12px] font-medium text-[#86868b] -mt-0.5">/ 100</span>
+          <span className="text-[44px] font-semibold tracking-[-0.04em] tabular-nums text-ink" >{animatedScore}</span>
+          <span className="text-[12px] font-medium text-ink-3 -mt-0.5">/ 100</span>
         </div>
       </div>
     </div>

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils/formatters';
+import { ThemeToggle } from '../ui/ThemeToggle';
 
 const studentNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -43,10 +44,10 @@ export const MainLayout = () => {
       {/* Wordmark */}
       <div className="px-6 pt-8 pb-10">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-[9px] bg-[#1d1d1f] flex items-center justify-center">
-            <span className="text-[#fff] font-semibold text-[13px] tracking-tight">S</span>
+          <div className="w-7 h-7 rounded-[9px] bg-ink flex items-center justify-center">
+            <span className="text-canvas font-semibold text-[13px] tracking-tight">S</span>
           </div>
-          <span className="text-[17px] font-semibold text-[#1d1d1f] tracking-[-0.022em]">SaverAI</span>
+          <span className="text-[17px] font-semibold text-ink tracking-[-0.022em]">SaverAI</span>
         </div>
       </div>
 
@@ -61,7 +62,7 @@ export const MainLayout = () => {
               onClick={() => setIsMobileOpen(false)}
               className={cn(
                 'group flex items-center gap-3 px-3 h-10 rounded-[10px] text-[14px] font-medium tracking-[-0.011em] transition-colors duration-200 relative',
-                isActive ? 'text-[#1d1d1f]' : 'text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.03]'
+                isActive ? 'text-ink' : 'text-ink-2 hover:text-ink hover:bg-black/[0.03]'
               )}
             >
               {isActive && (
@@ -71,7 +72,7 @@ export const MainLayout = () => {
                   transition={{ type: 'spring', stiffness: 500, damping: 40 }}
                 />
               )}
-              <item.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} className={cn('relative', isActive ? 'text-[#0071e3]' : 'text-[#86868b] group-hover:text-[#515154]')} />
+              <item.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} className={cn('relative', isActive ? 'text-accent' : 'text-ink-3 group-hover:text-ink-2')} />
               <span className="relative">{item.label}</span>
             </NavLink>
           );
@@ -82,19 +83,22 @@ export const MainLayout = () => {
       <div className="px-3 pb-6 mt-auto">
         <div className="h-px bg-black/[0.06] mx-3 mb-4" />
         <div className="flex items-center gap-3 px-3 py-1.5">
-          <div className="w-8 h-8 rounded-full bg-black/[0.07] flex items-center justify-center text-[#1d1d1f] text-[13px] font-semibold flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-black/[0.07] flex items-center justify-center text-ink text-[13px] font-semibold flex-shrink-0">
             {user?.name?.charAt(0)}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-medium text-[#1d1d1f] truncate">{user?.name}</p>
-            <p className="text-[12px] text-[#86868b] truncate">{user?.email}</p>
+            <p className="text-[13px] font-medium text-ink truncate">{user?.name}</p>
+            <p className="text-[12px] text-ink-3 truncate">{user?.email}</p>
           </div>
+        </div>
+        <div className="px-3 mt-3 mb-2">
+          <ThemeToggle />
         </div>
         <button
           onClick={logout}
-          className="mt-1 flex items-center gap-3 px-3 h-10 w-full rounded-[10px] text-[14px] font-medium text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.03] transition-colors"
+          className="mt-1 flex items-center gap-3 px-3 h-10 w-full rounded-[10px] text-[14px] font-medium text-ink-2 hover:text-ink hover:bg-black/[0.03] transition-colors"
         >
-          <LogOut size={18} strokeWidth={1.8} className="text-[#86868b]" />
+          <LogOut size={18} strokeWidth={1.8} className="text-ink-3" />
           <span>Sign out</span>
         </button>
       </div>
@@ -104,7 +108,7 @@ export const MainLayout = () => {
   return (
     <div className="min-h-screen flex app-bg">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-[248px] h-screen sticky top-0 border-r border-black/[0.06] bg-[#fff]/70 backdrop-blur-2xl backdrop-saturate-150 z-30 flex-shrink-0">
+      <aside className="hidden lg:flex flex-col w-[248px] h-screen sticky top-0 border-r border-black/[0.06] bg-surface/70 backdrop-blur-2xl backdrop-saturate-150 z-30 flex-shrink-0">
         <NavContent />
       </aside>
 
@@ -115,7 +119,7 @@ export const MainLayout = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-[rgba(0,0,0,0.35)] backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setIsMobileOpen(false)}
           />
         )}
@@ -129,7 +133,7 @@ export const MainLayout = () => {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-            className="fixed inset-y-0 left-0 w-[260px] bg-[#fff] z-50 lg:hidden shadow-2xl"
+            className="fixed inset-y-0 left-0 w-[260px] bg-surface z-50 lg:hidden shadow-2xl"
           >
             <NavContent />
           </motion.aside>
@@ -139,11 +143,11 @@ export const MainLayout = () => {
       {/* Main Area */}
       <main className="flex-1 min-h-screen flex flex-col">
         {/* Mobile header */}
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-black/[0.06] bg-[#fff]/80 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-20">
-          <button onClick={() => setIsMobileOpen(true)} className="p-2 -ml-2 text-[#1d1d1f]">
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-black/[0.06] bg-surface/80 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-20">
+          <button onClick={() => setIsMobileOpen(true)} className="p-2 -ml-2 text-ink">
             <Menu size={22} />
           </button>
-          <span className="text-[15px] font-semibold text-[#1d1d1f] tracking-tight">SaverAI</span>
+          <span className="text-[15px] font-semibold text-ink tracking-tight">SaverAI</span>
           <div className="w-9" />
         </header>
 

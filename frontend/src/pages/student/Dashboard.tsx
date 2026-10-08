@@ -49,7 +49,7 @@ export const Dashboard = () => {
   const perDay = remaining / daysLeft;
   const score = healthData?.score || 0;
   const rising = predictionData?.trend === 'increasing';
-  const barColor = spendRatio > 90 ? '#ff3b30' : spendRatio > 70 ? '#ff9f0a' : '#1d1d1f';
+  const barColor = spendRatio > 90 ? '#ff3b30' : spendRatio > 70 ? '#ff9f0a' : 'var(--color-ink)';
   const breakdown: any[] = categoryData?.breakdown || [];
   const maxCat = Math.max(1, ...breakdown.map((b: any) => b.total));
   const dateLabel = now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -70,10 +70,10 @@ export const Dashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-0">
             <div className="lg:col-span-3 lg:pr-12">
               <p className="eyebrow">Left to spend this month</p>
-              <p className="display-number text-[56px] sm:text-[80px] mt-4 text-[#1d1d1f]">{formatCurrency(remaining)}</p>
-              <p className="text-[17px] text-[#6e6e73] mt-4 tracking-[-0.016em]">
+              <p className="display-number text-[56px] sm:text-[80px] mt-4 text-ink">{formatCurrency(remaining)}</p>
+              <p className="text-[17px] text-ink-2 mt-4 tracking-[-0.016em]">
                 {remaining > 0 ? (
-                  <>That's about <span className="text-[#1d1d1f] font-medium">{formatCurrency(perDay)}</span> a day for the next {daysLeft} days.</>
+                  <>That's about <span className="text-ink font-medium">{formatCurrency(perDay)}</span> a day for the next {daysLeft} days.</>
                 ) : (
                   <>You've used your full allowance for this month.</>
                 )}
@@ -88,7 +88,7 @@ export const Dashboard = () => {
                     style={{ backgroundColor: barColor }}
                   />
                 </div>
-                <div className="flex justify-between mt-3 text-[13px] text-[#6e6e73]">
+                <div className="flex justify-between mt-3 text-[13px] text-ink-2">
                   <span>{formatCurrency(totalSpent)} spent</span>
                   <span>{formatCurrency(allowance)} allowance</span>
                 </div>
@@ -100,7 +100,7 @@ export const Dashboard = () => {
                 <p className="eyebrow">Forecast for next month</p>
                 <div className="flex items-baseline gap-3 mt-2">
                   <span className="display-number text-[32px]">{formatCurrency(predictionData?.predicted_amount || 0)}</span>
-                  <span className={`inline-flex items-center gap-0.5 text-[13px] font-medium ${rising ? 'text-[#d70015]' : 'text-[#248a3d]'}`}>
+                  <span className={`inline-flex items-center gap-0.5 text-[13px] font-medium ${rising ? 'text-red-400' : 'text-emerald-400'}`}>
                     {rising ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                     {rising ? 'Rising' : 'Falling'}
                   </span>
@@ -110,7 +110,7 @@ export const Dashboard = () => {
                 <p className="eyebrow">Financial health</p>
                 <div className="flex items-baseline gap-3 mt-2">
                   <span className="display-number text-[32px]">{score}</span>
-                  <span className="text-[15px] text-[#6e6e73]">{scoreWord(score)}</span>
+                  <span className="text-[15px] text-ink-2">{scoreWord(score)}</span>
                 </div>
               </div>
             </div>
@@ -121,11 +121,11 @@ export const Dashboard = () => {
       {/* Anomaly */}
       {anomaliesData?.anomalies?.length > 0 && (
         <motion.div {...fadeUp(0.14)}>
-          <div className="flex items-start gap-4 rounded-[20px] bg-[#fff8eb] px-6 py-5">
+          <div className="flex items-start gap-4 rounded-[20px] bg-[#ff9f0a]/10 px-6 py-5">
             <span className="mt-[7px] w-2 h-2 rounded-full bg-[#ff9f0a] flex-shrink-0" />
             <div>
-              <p className="text-[15px] font-semibold text-[#1d1d1f] tracking-tight">Unusual spending detected</p>
-              <p className="text-[14px] text-[#6e6e73] mt-1 leading-relaxed">{anomaliesData.message}</p>
+              <p className="text-[15px] font-semibold text-ink tracking-tight">Unusual spending detected</p>
+              <p className="text-[14px] text-ink-2 mt-1 leading-relaxed">{anomaliesData.message}</p>
             </div>
           </div>
         </motion.div>
@@ -135,30 +135,30 @@ export const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <motion.div {...fadeUp(0.2)} className="lg:col-span-3">
           <Card className="h-full p-8">
-            <h2 className="text-[21px] font-semibold tracking-[-0.022em] text-[#1d1d1f]">Spending</h2>
-            <p className="text-[14px] text-[#6e6e73] mt-1">Last 6 months</p>
+            <h2 className="text-[21px] font-semibold tracking-[-0.022em] text-ink">Spending</h2>
+            <p className="text-[14px] text-ink-2 mt-1">Last 6 months</p>
             <div className="mt-8"><SpendingTrend data={trendData?.spending_over_time || []} /></div>
           </Card>
         </motion.div>
 
         <motion.div {...fadeUp(0.26)} className="lg:col-span-2">
           <Card className="h-full p-8">
-            <h2 className="text-[21px] font-semibold tracking-[-0.022em] text-[#1d1d1f]">Where it went</h2>
-            <p className="text-[14px] text-[#6e6e73] mt-1">This month</p>
+            <h2 className="text-[21px] font-semibold tracking-[-0.022em] text-ink">Where it went</h2>
+            <p className="text-[14px] text-ink-2 mt-1">This month</p>
             {breakdown.length > 0 ? (
               <ul className="mt-8 space-y-5">
                 {breakdown.slice(0, 6).map((item: any, i: number) => (
                   <li key={item.category}>
                     <div className="flex items-baseline justify-between text-[14px]">
-                      <span className="text-[#1d1d1f] font-medium">{item.category}</span>
-                      <span className="text-[#6e6e73] tabular-nums">{formatCurrency(item.total)}</span>
+                      <span className="text-ink font-medium">{item.category}</span>
+                      <span className="text-ink-2 tabular-nums">{formatCurrency(item.total)}</span>
                     </div>
                     <div className="mt-2 h-1 bg-black/[0.06] rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${(item.total / maxCat) * 100}%` }}
                         transition={{ duration: 1, delay: 0.3 + i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                        className="h-full rounded-full bg-[#1d1d1f]"
+                        className="h-full rounded-full bg-ink"
                         style={{ opacity: Math.max(0.28, 1 - i * 0.14) }}
                       />
                     </div>
@@ -167,8 +167,8 @@ export const Dashboard = () => {
               </ul>
             ) : (
               <div className="py-16 text-center">
-                <p className="text-[17px] font-semibold text-[#1d1d1f]">Nothing spent yet</p>
-                <p className="text-[14px] text-[#6e6e73] mt-1">Add an expense and it shows up here.</p>
+                <p className="text-[17px] font-semibold text-ink">Nothing spent yet</p>
+                <p className="text-[14px] text-ink-2 mt-1">Add an expense and it shows up here.</p>
               </div>
             )}
           </Card>

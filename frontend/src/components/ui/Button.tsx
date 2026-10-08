@@ -16,10 +16,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants: Record<string, string> = {
       primary: 'bg-[#0071e3] text-[#fff] hover:bg-[#0077ed] active:bg-[#0062c3]',
-      secondary: 'bg-black/[0.05] text-[#1d1d1f] hover:bg-black/[0.08]',
-      outline: 'border border-black/15 text-[#1d1d1f] hover:bg-black/[0.04]',
-      ghost: 'text-[#0071e3] hover:bg-[#0071e3]/[0.08]',
-      danger: 'bg-[#ff3b30]/10 text-[#d70015] hover:bg-[#ff3b30]/15',
+      secondary: 'bg-black/[0.05] text-ink hover:bg-black/[0.08]',
+      outline: 'border border-black/15 text-ink hover:bg-black/[0.04]',
+      ghost: 'text-accent hover:bg-[#0071e3]/[0.08]',
+      danger: 'bg-[#ff3b30]/10 text-red-400 hover:bg-[#ff3b30]/15',
     };
 
     const sizes: Record<string, string> = {
