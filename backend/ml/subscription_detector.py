@@ -97,6 +97,8 @@ def detect_subscriptions(expenses, min_confidence=0.7):
         if conf < min_confidence:
             continue
         period, _ = _cycle_closeness(med)
+        if period == 'weekly' and len(items) < 3:
+            continue  # two purchases a week apart is a coincidence, not a weekly plan
         amount = float(np.median(amounts))
         per_month = amount * {'weekly': 4.35, 'monthly': 1, 'yearly': 1 / 12}[period]
         found.append({

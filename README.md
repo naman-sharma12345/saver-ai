@@ -58,7 +58,7 @@ Everything marked "AI" runs locally with classical machine learning. There is no
 | Unusual spending | Isolation Forest on amount and timing |
 | Financial health score | Composite of savings ratio, budget adherence and spending discipline |
 | Spending forecast | Regression on monthly history with 95% confidence intervals |
-| Subscription detection | Logistic regression over gap regularity, amount stability and cycle fit (weekly, monthly, yearly), trained in-process on synthetic patterns with a fixed seed |
+| Subscription detection | Logistic regression over gap regularity, amount stability and cycle fit (weekly, monthly, yearly), trained in-process on synthetic patterns with a fixed seed; a weekly cycle needs at least 3 charges |
 | Cheaper stores | Geodesic distance plus price-level model over a store table |
 
 Why this matters for a startup: zero marginal AI cost per user, no data leaves our servers for inference, and the models are ours to improve.
