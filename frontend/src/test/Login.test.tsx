@@ -21,10 +21,10 @@ describe('Login Component', () => {
       </BrowserRouter>
     )
 
-    expect(screen.getByText('Welcome back')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('you@example.com')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Sign In/i })).toBeInTheDocument()
+    expect(screen.getByText('Sign in to SaverAI')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Email')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Password')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Continue/i })).toBeInTheDocument()
   })
 
   it('shows error if fields are empty', async () => {
@@ -34,7 +34,7 @@ describe('Login Component', () => {
       </BrowserRouter>
     )
 
-    const button = screen.getByRole('button', { name: /Sign In/i })
+    const button = screen.getByRole('button', { name: /Continue/i })
     fireEvent.click(button)
     // Toast error would be triggered here, we can mock toast to test it if we want.
   })
