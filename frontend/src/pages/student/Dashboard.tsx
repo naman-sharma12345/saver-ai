@@ -50,6 +50,7 @@ export const Dashboard = () => {
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const daysLeft = Math.max(1, daysInMonth - now.getDate() + 1);
   const perDay = remaining / daysLeft;
+  const runRate = now.getDate() > 0 ? (totalSpent / now.getDate()) * daysInMonth : 0;
   const score = healthData?.score || 0;
   const rising = predictionData?.trend === 'increasing';
   const barColor = spendRatio > 90 ? '#ff3b30' : spendRatio > 70 ? '#ff9f0a' : 'var(--color-ink)';
@@ -100,9 +101,12 @@ export const Dashboard = () => {
 
             <div className="lg:col-span-2 lg:pl-12 lg:border-l border-black/[0.07] flex flex-col justify-center divide-y divide-black/[0.07]">
               <div className="pb-6">
-                <p className="eyebrow">Forecast for next month</p>
+                <p className="eyebrow">{hasFeature('forecast') ? 'Forecast for next month' : 'Projected this month'}</p>
                 {!hasFeature('forecast') ? (
-                  <Link to="/pricing" className="inline-block mt-2 text-[15px] font-medium text-accent">Unlock forecast with Pro</Link>
+                  <>
+                    <p className="display-number text-[32px] mt-2">{formatCurrency(runRate)}</p>
+                    <p className="text-[13px] text-ink-3 mt-1">At your pace this month. <Link to="/pricing" className="text-accent font-medium">Next-month ML forecast with Pro</Link></p>
+                  </>
                 ) : (
                 <div className="flex items-baseline gap-3 mt-2">
                   <span className="display-number text-[32px]">{formatCurrency(predictionData?.predicted_amount || 0)}</span>

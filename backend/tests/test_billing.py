@@ -25,7 +25,7 @@ def test_new_user_gets_trial(client):
     assert ent['status'] == 'trial' and ent['is_pro'] is True
     assert 1 <= ent['trial_days_left'] <= 7
     r = client.get('/api/recommendations', headers=_auth(body['access_token']))
-    assert r.status_code == 200
+    assert r.status_code == 200 and r.get_json()['locked'] is False
 
 
 def test_expired_trial_is_locked(client, app):
@@ -35,13 +35,17 @@ def test_expired_trial_is_locked(client, app):
         u.trial_ends_at = datetime.utcnow() - timedelta(days=1)
         db.session.commit()
     h = _auth(body['access_token'])
-    for method, url in [('get', '/api/recommendations'), ('get', '/api/analytics/next-month-prediction'),
+    for method, url in [('get', '/api/analytics/next-month-prediction'),
                         ('post', '/api/stores/cheaper-alternatives')]:
         r = getattr(client, method)(url, headers=h)
         assert r.status_code == 402, url
         assert r.get_json()['code'] == 'upgrade_required'
-    # free features still work
+    # free features still work, with tasters for the paid depth
     assert client.get('/api/expenses', headers=h).status_code == 200
+    tips = client.get('/api/recommendations', headers=h).get_json()
+    assert tips['locked'] is True and len(tips['recommendations']) <= 1
+    subs = client.get('/api/subscriptions', headers=h).get_json()
+    assert subs['locked'] is True and subs['subscriptions'] == []
 
 
 def test_mock_checkout_activates_pro(client, app):
@@ -51,10 +55,10 @@ def test_mock_checkout_activates_pro(client, app):
         u.trial_ends_at = datetime.utcnow() - timedelta(days=1)
         db.session.commit()
     h = _auth(body['access_token'])
-    assert client.get('/api/recommendations', headers=h).status_code == 402
+    assert client.get('/api/analytics/next-month-prediction', headers=h).status_code == 402
     r = client.post('/api/billing/checkout', json={'interval': 'monthly'}, headers=h)
     assert r.status_code == 200 and r.get_json()['mode'] == 'mock'
-    assert client.get('/api/recommendations', headers=h).status_code == 200
+    assert client.get('/api/analytics/next-month-prediction', headers=h).status_code == 200
     st = client.get('/api/billing/status', headers=h).get_json()
     assert st['entitlement']['status'] == 'active'
 
