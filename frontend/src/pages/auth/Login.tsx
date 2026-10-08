@@ -27,7 +27,7 @@ export const Login = () => {
       toast.success('Welcome back!');
       navigate(data.user.role === 'parent' ? '/parent' : '/dashboard');
     } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Login failed');
+      toast.error(err.response?.data?.error || 'Login failed', { duration: err.response?.data?.code === 'consent_pending' ? 7000 : 4000 });
     } finally {
       setIsLoading(false);
     }
