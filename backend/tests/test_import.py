@@ -56,3 +56,43 @@ def test_user_entered_expense_date(client, auth_headers):
     r = client.post('/api/expenses', json={'amount': 40, 'description': 'chai', 'store_name': 'Stall', 'date': '2026-01-15'}, headers=auth_headers)
     assert r.status_code == 201 and r.get_json()['expense']['created_at'].startswith('2026-01-15')
     assert client.post('/api/expenses', json={'amount': 40, 'description': 'x', 'store_name': 'y', 'date': '2999-01-01'}, headers=auth_headers).status_code == 400
+
+
+def _make_pdf(rows):
+    import io
+    from reportlab.lib.pagesizes import A4
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+    from reportlab.lib import colors
+    buf = io.BytesIO()
+    t = Table(rows)
+    t.setStyle(TableStyle([('GRID', (0, 0), (-1, -1), 0.5, colors.black)]))
+    SimpleDocTemplate(buf, pagesize=A4).build([t])
+    return buf.getvalue()
+
+
+def test_pdf_statement_import(client, auth_headers):
+    import base64
+    pdf = _make_pdf([
+        ['Date', 'Narration', 'Withdrawal Amt.', 'Deposit Amt.'],
+        ['01/09/26', 'UPI-ZOMATO-ZOMATO@ICICI-4023', '1250.50', ''],
+        ['02/09/26', 'UPI-RAHUL-Pocket money', '', '5000.00'],
+        ['03/09/26', 'NEFT-OLA CABS-RIDE', '230.00', ''],
+    ])
+    b64 = base64.b64encode(pdf).decode()
+    r = client.post('/api/expenses/import', json={'pdf_base64': b64}, headers=auth_headers)
+    body = r.get_json()
+    assert r.status_code == 200, body
+    assert len(body['rows']) == 2 and body['skipped'] == 1 and body['total'] == 1480.5
+    r = client.post('/api/expenses/import', json={'pdf_base64': b64, 'commit': True}, headers=auth_headers)
+    assert r.status_code == 201 and r.get_json()['imported'] == 2
+
+
+def test_pdf_rejects_non_pdf_and_empty_tables(client, auth_headers):
+    import base64
+    bad = base64.b64encode(b'hello world').decode()
+    assert client.post('/api/expenses/import', json={'pdf_base64': bad}, headers=auth_headers).status_code == 400
+    from reportlab.pdfgen import canvas
+    import io
+    buf = io.BytesIO(); c = canvas.Canvas(buf); c.drawString(100, 700, 'no table here'); c.save()
+    r = client.post('/api/expenses/import', json={'pdf_base64': base64.b64encode(buf.getvalue()).decode()}, headers=auth_headers)
+    assert r.status_code == 400 and 'table' in r.get_json()['error']
