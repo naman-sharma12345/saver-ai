@@ -43,7 +43,7 @@ export const Budget = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Budget</h1>
+        <h1 className="display-title">Budget</h1>
         <p className="text-sm text-slate-500 mt-0.5">Track spending against your limits for {currentMonth}.</p>
       </div>
 
