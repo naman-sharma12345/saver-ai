@@ -5,11 +5,27 @@ import { Input } from '../../components/ui/Input';
 import { Loader } from '../../components/ui/Loader';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
+import { authApi } from '../../api/auth';
+import toast from 'react-hot-toast';
 
 export const Profile = () => {
   const { data, isLoading } = useProfile();
   const updateMutation = useUpdateProfile();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const downloadData = async () => {
+    const d = await authApi.exportData();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }));
+    a.download = 'saverai-my-data.json';
+    a.click();
+  };
+  const deleteAccount = async () => {
+    const pw = window.prompt('This permanently deletes your account and all your data. Type your password to confirm.');
+    if (!pw) return;
+    try { await authApi.deleteAccount(pw); toast.success('Account deleted'); logout(); }
+    catch (e: any) { toast.error(e?.response?.data?.error || 'Could not delete the account'); }
+  };
 
   const [formData, setFormData] = useState({ name: '', monthly_allowance: '', parent_email: '' });
 
@@ -79,6 +95,15 @@ export const Profile = () => {
           Save changes
         </Button>
       </motion.form>
+
+      <section className="mt-12 space-y-3">
+        <h2 className="text-[21px] font-semibold tracking-[-0.022em] text-ink">Your data</h2>
+        <p className="text-[14px] text-ink-2">Download everything SaverAI holds about you, or delete your account for good.</p>
+        <div className="flex gap-3">
+          <Button type="button" variant="secondary" onClick={downloadData}>Download my data</Button>
+          <Button type="button" variant="danger" onClick={deleteAccount}>Delete account</Button>
+        </div>
+      </section>
     </div>
   );
 };
