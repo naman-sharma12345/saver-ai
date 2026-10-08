@@ -48,7 +48,7 @@ export const Dashboard = () => {
       <motion.div {...fadeUp()}>
         <div className="flex items-end justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">
+            <h1 className="text-4xl font-bold tracking-tight text-gradient-hero">
               Hello, {user?.name?.split(' ')[0]}
             </h1>
             <p className="text-slate-500 text-sm mt-1">Here's your financial pulse for this month.</p>
@@ -70,7 +70,7 @@ export const Dashboard = () => {
             </div>
             <div>
               <p className="text-sm font-semibold text-red-400">Unusual spending detected</p>
-              <p className="text-xs text-red-400/60 mt-0.5">{anomaliesData.message}</p>
+              <p className="text-xs text-red-300/80 mt-0.5">{anomaliesData.message}</p>
             </div>
           </div>
         </motion.div>
@@ -79,25 +79,25 @@ export const Dashboard = () => {
       {/* Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Spent This Month */}
-        <motion.div {...fadeUp(0.1)}>
-          <Card className="p-5 group relative overflow-hidden">
+        <motion.div {...fadeUp(0.1)} className="h-full">
+          <Card className="h-full p-5 group relative overflow-hidden">
             <div className="absolute -top-4 -right-4 text-white/[0.02] group-hover:text-white/[0.04] transition-colors">
               <Wallet size={80} />
             </div>
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Spent</p>
-            <h3 className="text-2xl font-bold text-white mt-2 tabular-nums">
+            <p className="stat-label">Spent</p>
+            <h3 className="text-3xl font-bold text-white mt-3 tabular-nums tracking-tight">
               {formatCurrency(totalSpent)}
             </h3>
             <div className="mt-3">
               <div className="flex items-center justify-between text-[11px] mb-1.5">
-                <span className="text-slate-600">{spendRatio.toFixed(0)}% of allowance</span>
+                <span className="text-slate-500">{spendRatio.toFixed(0)}% of allowance</span>
               </div>
-              <div className="h-1 bg-white/[0.04] rounded-full overflow-hidden">
+              <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${spendRatio}%` }}
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                  className={`h-full rounded-full ${spendRatio > 90 ? 'bg-red-500' : spendRatio > 70 ? 'bg-amber-500' : 'bg-cyan-500'}`}
+                  className={`h-full rounded-full ${spendRatio > 90 ? 'bg-red-500' : spendRatio > 70 ? 'bg-amber-500' : 'bg-gradient-to-r from-cyan-400 to-blue-500'}`}
                 />
               </div>
             </div>
@@ -105,13 +105,13 @@ export const Dashboard = () => {
         </motion.div>
 
         {/* Remaining */}
-        <motion.div {...fadeUp(0.15)}>
-          <Card className="p-5 group relative overflow-hidden">
+        <motion.div {...fadeUp(0.15)} className="h-full">
+          <Card className="h-full p-5 group relative overflow-hidden">
             <div className="absolute -top-4 -right-4 text-white/[0.02] group-hover:text-white/[0.04] transition-colors">
               <Target size={80} />
             </div>
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Remaining</p>
-            <h3 className="text-2xl font-bold text-white mt-2 tabular-nums">
+            <p className="stat-label">Remaining</p>
+            <h3 className="text-3xl font-bold text-white mt-3 tabular-nums tracking-tight">
               {formatCurrency(remaining)}
             </h3>
             <div className="mt-3 flex items-center gap-1.5">
@@ -123,13 +123,13 @@ export const Dashboard = () => {
         </motion.div>
 
         {/* AI Prediction */}
-        <motion.div {...fadeUp(0.2)}>
-          <Card className="p-5 group relative overflow-hidden">
+        <motion.div {...fadeUp(0.2)} className="h-full">
+          <Card className="h-full p-5 group relative overflow-hidden">
             <div className="absolute -top-4 -right-4 text-white/[0.02] group-hover:text-white/[0.04] transition-colors">
               <Brain size={80} />
             </div>
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">AI Forecast</p>
-            <h3 className="text-2xl font-bold text-white mt-2 tabular-nums">
+            <p className="stat-label">AI Forecast</p>
+            <h3 className="text-3xl font-bold text-white mt-3 tabular-nums tracking-tight">
               {formatCurrency(predictionData?.predicted_amount || 0)}
             </h3>
             <div className="mt-3 flex items-center gap-1.5">
@@ -148,10 +148,10 @@ export const Dashboard = () => {
         </motion.div>
 
         {/* Health Score */}
-        <motion.div {...fadeUp(0.25)}>
-          <Card className="p-5 relative overflow-hidden">
+        <motion.div {...fadeUp(0.25)} className="h-full">
+          <Card className="h-full p-5 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Health Score</p>
+            <p className="stat-label mb-1">Health Score</p>
             <HealthGauge score={healthData?.score || 0} />
           </Card>
         </motion.div>
@@ -160,17 +160,17 @@ export const Dashboard = () => {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <motion.div {...fadeUp(0.3)} className="lg:col-span-3">
-          <Card className="p-6">
+          <Card className="h-full p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm font-semibold text-white">Spending Trend</h3>
               <span className="text-[11px] text-slate-600">Last 6 months</span>
             </div>
-            <SpendingTrend data={trendData?.spending_over_time || []} />
+            <div className="mt-2"><SpendingTrend data={trendData?.spending_over_time || []} /></div>
           </Card>
         </motion.div>
 
         <motion.div {...fadeUp(0.35)} className="lg:col-span-2">
-          <Card className="p-6">
+          <Card className="h-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-white">Categories</h3>
               <span className="text-[11px] text-slate-600">{currentMonth}</span>
