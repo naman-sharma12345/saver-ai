@@ -16,6 +16,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from models import Expense
 from ml.categorizer import predict_category
+from ml.category_rules import rule_category, learn_rule
 from ml.anomaly_detection import detect_anomalies, flag_anomalies_in_db
 
 expenses_bp = Blueprint('expenses', __name__)
@@ -81,13 +82,18 @@ def create_expense():
     category = data.get('category', '').strip()
     ml_info = None
     if not category:
-        result = predict_category(description, store_name)
-        category = result['category']
-        ml_info = {
-            'predicted_category': result['category'],
-            'confidence': result['confidence'],
-            'method': result['method'],
-        }
+        taught = rule_category(user_id, store_name, description)
+        if taught:
+            category = taught
+            ml_info = {'predicted_category': taught, 'confidence': 1.0, 'method': 'your_rule'}
+        else:
+            result = predict_category(description, store_name)
+            category = result['category']
+            ml_info = {
+                'predicted_category': result['category'],
+                'confidence': result['confidence'],
+                'method': result['method'],
+            }
 
     when, err = _parse_day(data.get('date'))
     if err:
@@ -252,8 +258,11 @@ def update_expense(expense_id):
             return jsonify({'error': 'amount must be a positive number'}), 400
         expense.amount = amount
 
+    category_changed = False
     if 'category' in data:
-        expense.category = str(data['category']).strip()
+        new_cat = str(data['category']).strip()
+        category_changed = bool(new_cat) and new_cat != expense.category
+        expense.category = new_cat
     if 'description' in data:
         expense.description = str(data['description']).strip()
     if 'store_name' in data:
@@ -271,12 +280,16 @@ def update_expense(expense_id):
         expense.created_at = when
 
     expense.updated_at = datetime.now(timezone.utc)
+    rule = learn_rule(user_id, expense.store_name, expense.description, expense.category) if category_changed else None
     db.session.commit()
 
-    return jsonify({
+    body = {
         'message': 'Expense updated successfully',
         'expense': expense.to_dict(),
-    }), 200
+    }
+    if rule:
+        body['rule_learned'] = {'merchant': rule['merchant'], 'category': rule['category']}
+    return jsonify(body), 200
 
 
 # ─────────────────────────────────────────────────────────────────────────────
