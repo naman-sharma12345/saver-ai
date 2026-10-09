@@ -37,5 +37,6 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       # vite-plugin-pwa has a peer-dependency range that lags vite, same flag as the Dockerfile
       - run: npm ci --legacy-peer-deps
+      - run: npm test
       - run: npm run build
       - run: npm test
