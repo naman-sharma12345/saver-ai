@@ -38,6 +38,9 @@ const GoalCard = ({ g, onChange }: { g: Goal; onChange: () => void }) => {
         <div className="h-full rounded-full bg-[#0071e3] transition-all" style={{ width: `${Math.round(g.progress * 100)}%` }} />
       </div>
       <p className={`text-[14px] mt-3 ${s.color}`}>{s.text}</p>
+      {g.match_percent > 0 && (
+        <p className="text-[14px] mt-2 text-ink-2">Your parent matches {g.match_percent}% of what you save{g.match_cap ? ` (up to ${formatCurrency(g.match_cap)})` : ''}. Promised so far: <span className="font-semibold text-ink">{formatCurrency(g.matched_amount)}</span></p>
+      )}
       {g.status !== 'done' && (
         <form className="flex gap-2 mt-4" onSubmit={(e) => { e.preventDefault(); if (n > 0) add.mutate(n); }}>
           <Input type="number" min="1" placeholder="Add savings" value={amt} onChange={(e) => setAmt(e.target.value)} />

@@ -37,6 +37,8 @@ def _out(goal, surplus):
         'id': goal.id, 'name': goal.name, 'target_amount': goal.target_amount,
         'saved_amount': goal.saved_amount,
         'deadline': goal.deadline.isoformat() if goal.deadline else None,
+        'match_percent': goal.match_percent or 0, 'match_cap': goal.match_cap,
+        'matched_amount': goal.matched_amount or 0.0,
     }
     d.update(project_goal(goal, monthly_surplus=surplus))
     return d
@@ -149,5 +151,12 @@ def contribute(goal_id):
     except (TypeError, ValueError):
         return jsonify({'error': 'amount must be a non-zero number'}), 400
     goal.saved_amount = max(0.0, round((goal.saved_amount or 0) + amount, 2))
+    if goal.match_percent:
+        # The parent's pledge follows the student's own savings, up to the parent's cap.
+        delta = amount * goal.match_percent / 100.0
+        new = (goal.matched_amount or 0.0) + delta
+        if goal.match_cap is not None:
+            new = min(new, goal.match_cap)
+        goal.matched_amount = max(0.0, round(new, 2))
     db.session.commit()
     return jsonify(_out(goal, _surplus(goal.user_id))), 200

@@ -5,6 +5,7 @@ export interface Goal {
   progress: number; remaining: number; pace_per_month: number | null; pace_source: 'saved' | 'surplus' | null;
   projected_finish: string | null; needed_per_month: number | null;
   status: 'done' | 'on_track' | 'behind' | 'no_pace';
+  match_percent: number; match_cap: number | null; matched_amount: number;
 }
 
 export const goalsApi = {

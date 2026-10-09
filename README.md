@@ -39,6 +39,7 @@ SaverAI is built around that moment.
 - **Parent dashboard.** `GET /api/parent/children` and `/children/<id>/summary` feed the parent overview (spent, allowance, health score, unusual-expense count). These two endpoints were missing from the backend before, so the parent screen showed no students; fixed.
 - **Parent weekly view.** `GET /api/parent/children/<id>/weekly` gives a linked parent the shape of their student's week (total, change vs the week before, top category, daily bars, no-spend days). It leaves out the biggest purchase and subscription names on purpose.
 - **Ask your parent for extra money.** A student with a linked parent can send one request at a time (amount and a short reason) from the Ask parent page. The parent sees it under "Waiting for you" on their dashboard and taps Approve or Decline. Both get an email. It records the decision only and does not move money.
+- **Parent match on savings goals.** A parent can pick a match (25, 50 or 100%) on a student's goal. Every rupee the student saves adds the parent's share to a running "promised so far" figure, shown to both, with an optional cap in the API. It is a promise, not a payment: SaverAI does not move money. `PUT /api/parent/children/<id>/goals/<goal_id>/match`.
 - **Receipt scanning (prototype).** `POST /api/expenses/receipt` reads a receipt photo with local Tesseract OCR, finds merchant, total and date, and suggests a category. Nothing is saved and no external API is used. The Add expense dialog has a "Scan a receipt" button (opens the camera on phones) that fills the form for you to check. Needs `tesseract-ocr` on the server; accuracy on real photos is unmeasured. See `docs/RECEIPT_SCANNING.md`.
 - **Get started checklist.** New users see a four-step card on the dashboard (allowance, first expense, budget, goal) that ticks off as they do each thing and disappears when done. `GET /api/onboarding`.
 - **Upcoming bills.** `GET /api/subscriptions/upcoming` lists detected recurring charges due in the next 14 days (up to 60), shown on the Subscriptions page. Free sees the count and total, Pro sees which ones.
@@ -148,7 +149,7 @@ Merged and tested is not the same as ready for real users. Before launch:
 - [ ] Real Razorpay keys, a live webhook, and a test payment end to end
 - [ ] Run the migrations and the app against PostgreSQL and fix anything SQLite hid
 - [ ] Rate limits live in process memory. Behind several workers or servers they need a shared store such as Redis
-- [ ] Run `flask db upgrade` for the new tables (category rules, extra money requests). Request emails only log until `SMTP_*` is set
+- [ ] Run `flask db upgrade` for the new tables (category rules, extra money requests, goal match). Request emails only log until `SMTP_*` is set
 - [ ] Receipt scanning needs the `tesseract-ocr` package in the backend image (not yet in Docker), and real-photo accuracy has not been measured
 - [x] Daily scheduler starts in one process only (file lock, so gunicorn workers do not each run it)
 - [ ] Rotate the secrets that were committed earlier (old JWT secret and AI key remain in git history)
