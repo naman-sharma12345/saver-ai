@@ -198,6 +198,10 @@ class Goal(db.Model):
     saved_amount = db.Column(db.Float, nullable=False, default=0.0)
     deadline = db.Column(db.Date, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    # Parent match: a pledge, not a payment. matched_amount is what the parent has promised so far.
+    match_percent = db.Column(db.Integer, nullable=False, default=0)
+    match_cap = db.Column(db.Float, nullable=True)
+    matched_amount = db.Column(db.Float, nullable=False, default=0.0)
 
 
 class CategoryRule(db.Model):
