@@ -100,8 +100,9 @@ Flask API  ->  SQLAlchemy  ->  SQLite (dev) / PostgreSQL (prod)
    |
    +-- ml/          scikit-learn models (categorizer, anomaly, forecast, subscriptions)
    +-- plans.py     plans, trial and entitlement checks (single source of truth)
-   +-- routes/      auth, expenses, budgets, analytics, stores, parent, billing, subscriptions, goals, imports, ask
-   +-- APScheduler  daily recommendation job
+   +-- routes/      auth, expenses, budgets, analytics, stores, parent, billing, subscriptions, goals,
+                imports, ask, requests, receipts, streak, digest, onboarding, whatif
+   +-- APScheduler  daily recommendation job, Sunday parent email (one process, file lock)
 ```
 
 Billing is behind clean seams:
@@ -122,6 +123,7 @@ cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env            # set JWT_SECRET_KEY at minimum
+flask db upgrade                # create the tables (needed once, and after every pull)
 python seed_db.py               # demo data and trains the categorizer
 python run.py                   # http://localhost:5000
 
@@ -153,7 +155,7 @@ Merged and tested is not the same as ready for real users. Before launch:
 - [ ] Run the migrations and the app against PostgreSQL and fix anything SQLite hid
 - [ ] Rate limits live in process memory. Behind several workers or servers they need a shared store such as Redis
 - [ ] Run `flask db upgrade` for the new tables (category rules, extra money requests, goal match, weekly email opt-in). Request emails only log until `SMTP_*` is set
-- [ ] Receipt scanning needs the `tesseract-ocr` package in the backend image (not yet in Docker), and real-photo accuracy has not been measured
+- [ ] Receipt scanning: `tesseract-ocr` is now in the backend Dockerfile but the image has not been built and run here, and real-photo accuracy has not been measured. For local runs install it yourself (`sudo apt install tesseract-ocr` or `brew install tesseract`)
 - [x] Daily scheduler starts in one process only (file lock, so gunicorn workers do not each run it)
 - [ ] Rotate the secrets that were committed earlier (old JWT secret and AI key remain in git history)
 - [ ] Change or delete the demo logins
@@ -190,7 +192,7 @@ Point the Razorpay webhook at `/api/billing/webhook` for `subscription.activated
 
 ## Roadmap
 
-Shipped: Apple-style design system, dark mode, landing page, 7-day trial, paywall and pricing, Razorpay seam, subscription detection, savings goals, DPDP age gate and guardian consent, CSV statement import, Ask your money, auth hardening (rate limits, password reset, email verification), tested API and CI.
+Shipped: allowance requests, parent goal match, weekly parent email, streaks, Apple-style design system, dark mode, landing page, 7-day trial, paywall and pricing, Razorpay seam, subscription detection, savings goals, DPDP age gate and guardian consent, CSV statement import, Ask your money, auth hardening (rate limits, password reset, email verification), tested API and CI.
 
 Next, roughly in order:
 
@@ -201,7 +203,7 @@ Next, roughly in order:
 - [ ] Money stored as integer paise
 - [x] Bank / UPI statement import (CSV and text-based PDF with a transaction table; scanned PDFs are not supported)
 - [ ] Account Aggregator integration for consented bank data (needs a regulated FIU partner, see [docs/ACCOUNT_AGGREGATOR.md](docs/ACCOUNT_AGGREGATOR.md))
-- [ ] Receipt scanning
+- [x] Receipt scanning (prototype, needs Tesseract, accuracy on real photos unmeasured)
 - [x] User-taught category rules
 - [x] What-if savings simulator
 - [x] Weekly spending digest

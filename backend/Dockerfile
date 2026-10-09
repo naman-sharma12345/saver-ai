@@ -14,6 +14,7 @@ ENV FLASK_ENV=production
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     python3-dev \
+    tesseract-ocr \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies
