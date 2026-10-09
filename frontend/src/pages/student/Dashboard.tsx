@@ -13,6 +13,7 @@ import {
   useAnomalies
 } from '../../hooks/useQueries';
 import { formatCurrency } from '../../utils/formatters';
+import { GetStarted } from '../../components/GetStarted';
 import { Loader } from '../../components/ui/Loader';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
@@ -68,6 +69,8 @@ export const Dashboard = () => {
         </h1>
       </motion.div>
 
+      <motion.div {...fadeUp(0.04)}><GetStarted /></motion.div>
+
       {/* Hero */}
       <motion.div {...fadeUp(0.08)}>
         <Card className="p-8 lg:p-12">
@@ -76,7 +79,9 @@ export const Dashboard = () => {
               <p className="eyebrow">Left to spend this month</p>
               <p className="display-number text-[56px] sm:text-[80px] mt-4 text-ink">{formatCurrency(remaining)}</p>
               <p className="text-[17px] text-ink-2 mt-4 tracking-[-0.016em]">
-                {remaining > 0 ? (
+                {allowance <= 0 ? (
+                  <>Set your monthly allowance in <Link to="/profile" className="text-ink font-medium underline">Profile</Link> to see what's left each day.</>
+                ) : remaining > 0 ? (
                   <>That's about <span className="text-ink font-medium">{formatCurrency(perDay)}</span> a day for the next {daysLeft} days.</>
                 ) : (
                   <>You've used your full allowance for this month.</>
