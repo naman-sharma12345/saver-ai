@@ -154,7 +154,7 @@ export const MainLayout = () => {
       </AnimatePresence>
 
       {/* Main Area */}
-      <main className="flex-1 min-h-screen flex flex-col">
+      <main className="flex-1 min-w-0 min-h-screen flex flex-col">
         {/* Mobile header */}
         <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-black/[0.06] bg-surface/80 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-20">
           <button onClick={() => setIsMobileOpen(true)} className="p-2 -ml-2 text-ink">
