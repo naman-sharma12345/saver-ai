@@ -54,5 +54,8 @@ export const parentApi = {
   },
   weekly: async (childId: number): Promise<{ headline: string; total: number; previous_total: number; change_percent: number | null; daily: { date: string; amount: number }[]; no_spend_days: number; top_category: { name: string; amount: number } | null }> =>
     (await api.get(`/parent/children/${childId}/weekly`)).data,
+  weeklyEmail: async (): Promise<boolean> => (await api.get('/parent/weekly-email')).data.enabled,
+  setWeeklyEmail: async (enabled: boolean): Promise<boolean> => (await api.put('/parent/weekly-email', { enabled })).data.enabled,
+  weeklyPreview: async (): Promise<{ message: string }> => (await api.post('/parent/weekly-email/preview')).data,
   remind: async (childId: number, note?: string) => (await api.post(`/parent/children/${childId}/remind`, { note })).data,
 };
