@@ -24,6 +24,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export const SpendingTrend: React.FC<SpendingTrendProps> = ({ data }) => {
+  const active = data.filter((d) => d.total > 0).length;
+  if (active < 2) {
+    return (
+      <div className="w-full h-48 flex flex-col items-center justify-center text-center px-6">
+        <p className="text-[15px] font-medium text-ink">Your trend shows up here</p>
+        <p className="text-[13px] text-ink-2 mt-1">Log spending across two or more months and we will chart how it moves.</p>
+      </div>
+    );
+  }
   return (
     <div className="w-full h-72">
       <ResponsiveContainer width="100%" height="100%">
