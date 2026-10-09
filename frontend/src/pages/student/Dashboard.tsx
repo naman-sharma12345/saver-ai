@@ -14,6 +14,7 @@ import {
 } from '../../hooks/useQueries';
 import { formatCurrency } from '../../utils/formatters';
 import { GetStarted } from '../../components/GetStarted';
+import { StreakCard } from '../../components/StreakCard';
 import { Loader } from '../../components/ui/Loader';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
@@ -70,6 +71,7 @@ export const Dashboard = () => {
       </motion.div>
 
       <motion.div {...fadeUp(0.04)}><GetStarted /></motion.div>
+      <motion.div {...fadeUp(0.05)}><StreakCard /></motion.div>
 
       {/* Hero */}
       <motion.div {...fadeUp(0.08)}>
