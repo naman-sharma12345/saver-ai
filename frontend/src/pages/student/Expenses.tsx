@@ -133,7 +133,7 @@ export const Expenses = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="group flex items-center gap-4 px-6 py-4 border-b border-black/[0.06] last:border-b-0 hover:bg-black/[0.02] transition-colors"
+                      className="group flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 border-b border-black/[0.06] last:border-b-0 hover:bg-black/[0.02] transition-colors"
                     >
                       <div
                         className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[15px] font-semibold bg-black/[0.06] text-ink"
@@ -149,7 +149,7 @@ export const Expenses = () => {
                             aria-label={`Category for ${expense.description}`}
                             title="Wrong category? Change it and SaverAI remembers it for this merchant"
                             onChange={(e) => updateMutation.mutate({ id: expense.id, data: { category: e.target.value } })}
-                            className="bg-transparent text-ink-2 cursor-pointer hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/40 rounded"
+                            className="bg-transparent max-w-[8.5rem] text-ink-2 cursor-pointer hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/40 rounded"
                           >
                             {Array.from(new Set([...Object.keys(CATEGORY_COLORS), expense.category])).map((c) => <option key={c} value={c}>{c}</option>)}
                           </select>
@@ -159,7 +159,7 @@ export const Expenses = () => {
                       <button
                         onClick={() => handleDelete(expense.id)}
                         aria-label="Delete expense"
-                        className="p-2 -mr-2 rounded-full text-ink-3 hover:text-red-400 hover:bg-[#ff3b30]/10 transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100 flex-shrink-0"
+                        className="p-2 -mr-2 rounded-full text-ink-3 hover:text-red-400 hover:bg-[#ff3b30]/10 transition-colors sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 flex-shrink-0"
                       >
                         <Trash2 size={15} />
                       </button>
