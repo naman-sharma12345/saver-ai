@@ -23,11 +23,12 @@ export const Ask = () => {
   const send = async (q: string) => {
     const question = q.trim();
     if (!question || busy) return;
+    const previous = turns[0]?.q;
     setBusy(true);
     setText('');
     setTurns((t) => [{ q: question }, ...t]);
     try {
-      const a = await askApi.ask(question);
+      const a = await askApi.ask(question, previous);
       setTurns((t) => [{ q: question, a }, ...t.slice(1)]);
     } catch (e: any) {
       setTurns((t) => [{ q: question, error: e?.response?.data?.error || 'Something went wrong' }, ...t.slice(1)]);
