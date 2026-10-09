@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useChildren, useChildSummary } from '../../hooks/useQueries';
 import { Card } from '../../components/ui/Card';
 import { Loader } from '../../components/ui/Loader';
@@ -14,6 +15,7 @@ export const ParentDashboard = () => {
   const { data: childrenData, isLoading: lC } = useChildren();
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const { data: summary, isLoading: lS } = useChildSummary(selectedChildId || 0);
+  const { data: weekly } = useQuery({ queryKey: ['child-weekly', selectedChildId], queryFn: () => parentApi.weekly(selectedChildId as number), enabled: !!selectedChildId });
   const [note, setNote] = useState('');
   const [sending, setSending] = useState(false);
   const sendReminder = async () => {
@@ -90,6 +92,22 @@ export const ParentDashboard = () => {
                     </div>
                   </div>
                 </Card>
+
+                {weekly && (
+                  <Card className="p-8">
+                    <p className="eyebrow">Last 7 days</p>
+                    <p className="text-[19px] font-semibold text-ink mt-2 tracking-[-0.02em]">{weekly.headline}</p>
+                    <div className="flex items-end gap-2 h-20 mt-5" aria-hidden="true">
+                      {weekly.daily.map((d) => {
+                        const max = Math.max(1, ...weekly.daily.map((x) => x.amount));
+                        return <div key={d.date} className="flex-1 rounded-md bg-[#0071e3]/80" style={{ height: `${Math.max(4, (d.amount / max) * 100)}%`, opacity: d.amount ? 1 : 0.2 }} />;
+                      })}
+                    </div>
+                    <p className="text-[13px] text-ink-3 mt-3">
+                      {formatCurrency(weekly.total)} this week{weekly.top_category ? ` · mostly ${weekly.top_category.name}` : ''} · {weekly.no_spend_days} no-spend day{weekly.no_spend_days === 1 ? '' : 's'}
+                    </p>
+                  </Card>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <Card className="p-8 flex flex-col items-center">
