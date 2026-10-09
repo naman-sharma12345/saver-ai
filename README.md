@@ -210,7 +210,7 @@ Next, roughly in order:
 - Passwords hashed with bcrypt, 8 character minimum. JWT access and refresh tokens.
 - Rate limits on login, register and password reset. Reset links are signed, expire in one hour and work once. The forgot-password endpoint never reveals whether an email has an account.
 - Secondary text in light mode meets WCAG AA contrast (4.5:1) and every button and input has an accessible name (checked with a script across the student pages).
-- Empty states: a brand-new account no longer shows a made-up forecast (it was another users' average) or a health score; it says what is needed instead.
+- Empty states: a brand-new account no longer shows a made-up forecast (it was another users' average) or a health score; it says what is needed instead. The spending trend chart also shows a short hint instead of an empty axis until there are two months with spending.
 - Mobile: checked key pages at 375px wide; the Expenses list no longer overflows the screen and the delete button is always visible on touch devices.
 - Request bodies over 6 MB are rejected, statement import is rate limited, and over-long expense fields return a clear 400 instead of a database error.
 - Production refuses to start without `JWT_SECRET_KEY`.
