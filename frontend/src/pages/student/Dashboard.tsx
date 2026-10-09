@@ -113,21 +113,29 @@ export const Dashboard = () => {
                     <p className="text-[13px] text-ink-3 mt-1">At your pace this month. <Link to="/pricing" className="text-accent font-medium">Next-month ML forecast with Pro</Link></p>
                   </>
                 ) : (
+                predictionData?.method !== 'linear_regression' ? (
+                  <p className="text-[14px] text-ink-3 mt-2">Needs about 3 months of your own history. Keep logging and this fills in.</p>
+                ) : (
                 <div className="flex items-baseline gap-3 mt-2">
                   <span className="display-number text-[32px]">{formatCurrency(predictionData?.predicted_amount || 0)}</span>
-                  <span className={`inline-flex items-center gap-0.5 text-[13px] font-medium ${rising ? 'text-red-400' : 'text-emerald-400'}`}>
-                    {rising ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                    {rising ? 'Rising' : 'Falling'}
+                  <span className={`inline-flex items-center gap-0.5 text-[13px] font-medium ${rising ? 'text-red-400' : predictionData?.trend === 'decreasing' ? 'text-emerald-400' : 'text-ink-2'}`}>
+                    {rising ? <ArrowUpRight size={14} /> : predictionData?.trend === 'decreasing' ? <ArrowDownRight size={14} /> : null}
+                    {rising ? 'Rising' : predictionData?.trend === 'decreasing' ? 'Falling' : 'Steady'}
                   </span>
                 </div>
+                )
                 )}
               </div>
               <div className="pt-6">
                 <p className="eyebrow">Financial health</p>
+                {totalSpent === 0 ? (
+                  <p className="text-[14px] text-ink-3 mt-2">Log a few expenses to get your score.</p>
+                ) : (
                 <div className="flex items-baseline gap-3 mt-2">
                   <span className="display-number text-[32px]">{score}</span>
                   <span className="text-[15px] text-ink-2">{scoreWord(score)}</span>
                 </div>
+                )}
               </div>
             </div>
           </div>
