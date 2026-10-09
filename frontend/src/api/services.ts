@@ -52,5 +52,7 @@ export const parentApi = {
     const response = await api.get(`/parent/children/${childId}/summary`);
     return response.data;
   },
+  weekly: async (childId: number): Promise<{ headline: string; total: number; previous_total: number; change_percent: number | null; daily: { date: string; amount: number }[]; no_spend_days: number; top_category: { name: string; amount: number } | null }> =>
+    (await api.get(`/parent/children/${childId}/weekly`)).data,
   remind: async (childId: number, note?: string) => (await api.post(`/parent/children/${childId}/remind`, { note })).data,
 };
