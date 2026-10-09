@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { parentApi } from '../../api/services';
 import { requestsApi } from '../../api/requests';
+import { goalMatchApi } from '../../api/goalmatch';
 
 export const ParentDashboard = () => {
   const { data: childrenData, isLoading: lC } = useChildren();
@@ -23,6 +24,12 @@ export const ParentDashboard = () => {
     mutationFn: ({ id, d }: { id: number; d: 'approve' | 'decline' }) => requestsApi.decide(id, d),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['requests'] }); toast.success('Answer sent'); },
     onError: (e: any) => toast.error(e?.response?.data?.error || 'Could not send the answer'),
+  });
+  const { data: childGoals } = useQuery({ queryKey: ['child-goals', selectedChildId], queryFn: () => goalMatchApi.list(selectedChildId as number), enabled: !!selectedChildId });
+  const setMatch = useMutation({
+    mutationFn: ({ gid, pct }: { gid: number; pct: number }) => goalMatchApi.set(selectedChildId as number, gid, pct, null),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['child-goals'] }); toast.success('Match saved'); },
+    onError: (e: any) => toast.error(e?.response?.data?.error || 'Could not save the match'),
   });
   const pendingReqs = (reqs?.requests ?? []).filter((r) => r.status === 'pending');
   const [note, setNote] = useState('');
@@ -132,6 +139,26 @@ export const ParentDashboard = () => {
                     <p className="text-[13px] text-ink-3 mt-3">
                       {formatCurrency(weekly.total)} this week{weekly.top_category ? ` · mostly ${weekly.top_category.name}` : ''} · {weekly.no_spend_days} no-spend day{weekly.no_spend_days === 1 ? '' : 's'}
                     </p>
+                  </Card>
+                )}
+
+                {childGoals && childGoals.length > 0 && (
+                  <Card className="p-8">
+                    <p className="eyebrow">Savings goals</p>
+                    <p className="text-[14px] text-ink-2 mt-1">Pick a match and they save more. It is a promise you keep yourself, SaverAI does not move money.</p>
+                    <div className="mt-4 divide-y divide-black/[0.07]">
+                      {childGoals.map((g) => (
+                        <div key={g.id} className="py-3 flex flex-wrap items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-[16px] font-medium text-ink truncate">{g.name}</p>
+                            <p className="text-[13px] text-ink-2">{formatCurrency(g.saved_amount)} of {formatCurrency(g.target_amount)}{g.matched_amount > 0 ? ` · you owe ${formatCurrency(g.matched_amount)}` : ''}</p>
+                          </div>
+                          <select aria-label={`Match for ${g.name}`} className="rounded-xl border border-black/[0.1] bg-surface text-ink px-3 py-2 text-[14px]" value={g.match_percent} onChange={(e) => setMatch.mutate({ gid: g.id, pct: Number(e.target.value) })}>
+                            {[0, 25, 50, 100].map((v) => <option key={v} value={v}>{v === 0 ? 'No match' : `Match ${v}%`}</option>)}
+                          </select>
+                        </div>
+                      ))}
+                    </div>
                   </Card>
                 )}
 
