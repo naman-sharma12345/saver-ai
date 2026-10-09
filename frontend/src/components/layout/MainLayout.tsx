@@ -14,6 +14,7 @@ import {
   X,
   ChevronRight,
   Repeat,
+  HandCoins,
   Target,
   Upload,
   MessageCircle,
@@ -38,6 +39,7 @@ const studentNavItems = [
   { icon: Upload, label: 'Import', path: '/import' },
   { icon: Target, label: 'Goals', path: '/goals' },
   { icon: Repeat, label: 'Subscriptions', path: '/subscriptions' },
+  { icon: HandCoins, label: 'Ask parent', path: '/ask-parent' },
   { icon: User, label: 'Profile', path: '/profile' },
 ];
 

@@ -16,7 +16,7 @@ from datetime import date, datetime
 import bcrypt
 
 from app import db
-from models import User, Expense, Budget, Goal, CategoryRule
+from models import User, Expense, Budget, Goal, CategoryRule, AllowanceRequest
 from plans import start_trial_end
 from utils.ratelimit import rate_limit
 from utils.mailer import send_email
@@ -379,6 +379,7 @@ def export_data():
                    'deadline': g.deadline.isoformat() if g.deadline else None}
                   for g in Goal.query.filter_by(user_id=uid).all()],
         'category_rules': [r.to_dict() for r in CategoryRule.query.filter_by(user_id=uid).all()],
+        'allowance_requests': [r.to_dict() for r in AllowanceRequest.query.filter((AllowanceRequest.student_id == uid) | (AllowanceRequest.parent_id == uid)).all()],
     }), 200
 
 
@@ -396,6 +397,7 @@ def delete_account():
         return jsonify({'error': 'Password is incorrect'}), 403
     Goal.query.filter_by(user_id=user.id).delete()
     CategoryRule.query.filter_by(user_id=user.id).delete()
+    AllowanceRequest.query.filter((AllowanceRequest.student_id == user.id) | (AllowanceRequest.parent_id == user.id)).delete(synchronize_session=False)
     User.query.filter_by(parent_id=user.id).update({'parent_id': None})
     db.session.delete(user)
     db.session.commit()

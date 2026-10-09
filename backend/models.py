@@ -213,3 +213,26 @@ class CategoryRule(db.Model):
 
     def to_dict(self):
         return {'id': self.id, 'merchant': self.merchant_key, 'category': self.category}
+
+
+class AllowanceRequest(db.Model):
+    """A student's request to a linked parent for extra money, and the parent's answer."""
+    __tablename__ = 'allowance_requests'
+
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    parent_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    amount = db.Column(db.Float, nullable=False)
+    reason = db.Column(db.String(140), nullable=False)
+    status = db.Column(db.String(10), nullable=False, default='pending')  # pending | approved | declined
+    parent_note = db.Column(db.String(140), nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    decided_at = db.Column(db.DateTime, nullable=True)
+
+    def to_dict(self, student_name=None):
+        return {
+            'id': self.id, 'amount': self.amount, 'reason': self.reason, 'status': self.status,
+            'parent_note': self.parent_note, 'student_name': student_name,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'decided_at': self.decided_at.isoformat() if self.decided_at else None,
+        }
