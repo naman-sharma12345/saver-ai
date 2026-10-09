@@ -20,7 +20,10 @@ def ask():
         return jsonify({'error': 'question is required'}), 400
     if len(q) > 200:
         return jsonify({'error': 'Keep the question under 200 characters'}), 400
+    prev = data.get('previous')
+    if prev is not None and (not isinstance(prev, str) or len(prev) > 200):
+        prev = None
     user = User.query.get(int(get_jwt_identity()))
     expenses = Expense.query.filter_by(user_id=user.id).all()
     return jsonify(answer(q.strip(), expenses, allowance=user.monthly_allowance or 0.0,
-                          is_pro=get_entitlement(user)['is_pro'])), 200
+                          is_pro=get_entitlement(user)['is_pro'], previous=prev)), 200

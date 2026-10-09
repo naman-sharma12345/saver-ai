@@ -7,5 +7,5 @@ export interface AskAnswer {
 }
 
 export const askApi = {
-  ask: async (question: string): Promise<AskAnswer> => (await api.post('/ask', { question })).data,
+  ask: async (question: string, previous?: string): Promise<AskAnswer> => (await api.post('/ask', { question, previous })).data,
 };

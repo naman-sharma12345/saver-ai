@@ -266,10 +266,46 @@ def _inr(x):
     return 'Rs {:,.0f}'.format(x)
 
 
-def answer(question, expenses, allowance=0.0, today=None, is_pro=True):
+_PERIOD_RE = re.compile(
+    r'\b(?:this|last|past)\s+(?:month|week|year)\b|\b(?:today|yesterday)\b|\b(?:in\s+)?(?:the\s+)?(?:last|past)\s+\d{1,3}\s+days\b'
+    r'|\b(?:on|from)\s+\d{1,2}(?:st|nd|rd|th)?\s+[a-z]+(?:\s+(?:to|and)\s+\d{1,2}(?:st|nd|rd|th)?\s+[a-z]+)?\b|\b(?:in|during)\s+(?:' + '|'.join(MONTHS) + r')\b')
+_OPENER_RE = re.compile(r'^(?:and|also|ok(?:ay)?|what about|how about|aur|or|same for|and what about)\s+')
+_QUESTION_WORDS = {'how', 'what', 'which', 'show', 'list', 'tell', 'did', 'do', 'am', 'is', 'can', 'where', 'who', 'when'}
+
+
+def is_followup(q, previous, merchants=()):
+    """A short fragment that only makes sense after the previous question: "and last month?", "what about transport"."""
+    if not previous:
+        return False
+    if _OPENER_RE.match(q):
+        return True
+    words = q.split()
+    if len(words) > 3 or (set(words) & (DOMAIN_WORDS | _QUESTION_WORDS)):
+        return False
+    return bool(_PERIOD_RE.search(q) or parse_dates(q, date.today()) or find_categories(q, merchants) or any(m.lower() in q for m in merchants))
+
+
+def merge_followup(prev, q, merchants):
+    """Rebuild a full question from the previous one plus the new fragment (new period / category / merchant replaces the old)."""
+    frag = _OPENER_RE.sub('', q).strip()
+    base = prev
+    if _PERIOD_RE.search(frag) or parse_dates(frag, date.today()):
+        base = _PERIOD_RE.sub(' ', base)
+    new_words = set(re.findall(r'[a-z]+', frag))
+    if find_categories(frag, merchants) or any(m.lower() in frag for m in merchants):
+        drop = {w for ws in CATEGORY_WORDS.values() for w in ws} | {m.lower() for m in merchants} | {c.lower() for c in CATEGORY_WORDS}
+        base = ' '.join(w for w in base.split() if w not in drop or w in new_words)
+    return re.sub(r'\s+', ' ', base + ' ' + frag).strip()
+
+
+def answer(question, expenses, allowance=0.0, today=None, is_pro=True, previous=None):
     today = today or date.today()
     names = sorted({(e.store_name or '').strip() for e in expenses if (e.store_name or '').strip()})
     q = normalize(question, names)
+    followup = False
+    if previous and is_followup(q, normalize(previous, names), names):
+        q = merge_followup(normalize(previous, names), q, names)
+        followup = True
     start, end, label = parse_period(q, today)
     explicit_period = label not in ('this month',) or bool(re.search(r'\bthis month\b', q))
     intent, conf = classify(q)
@@ -306,7 +342,7 @@ def answer(question, expenses, allowance=0.0, today=None, is_pro=True):
     else:
         scope = ''
     cat = ' and '.join(cats) if cats and not merchants else None
-    out = {'intent': intent, 'confidence': round(conf, 2), 'period': label, 'locked': False}
+    out = {'intent': intent, 'confidence': round(conf, 2), 'period': label, 'locked': False, 'followup': followup}
 
     if not in_domain(q, names) and not (explicit_period and re.search(r'\bhow much\b', q)):
         out.update(intent='unknown', confidence=0.0, answer='I only know about your own spending. Try "how much did I spend on food this month?" or "what was my biggest expense last week?"')
