@@ -37,6 +37,7 @@ class User(db.Model):
     consent_status = db.Column(db.String(20), nullable=False, default='granted', server_default='granted')  # granted | pending
     consent_at = db.Column(db.DateTime, nullable=True)
     terms_accepted_at = db.Column(db.DateTime, nullable=True)
+    weekly_email = db.Column(db.Boolean, nullable=False, default=False, server_default='0')  # parents: opt in to the Sunday summary
 
     # Relationships
     parent = db.relationship('User', remote_side=[id], backref='children')
