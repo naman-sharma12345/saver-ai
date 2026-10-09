@@ -3,6 +3,8 @@ Parent routes – linking and viewing student data.
 POST /api/parent/link                              – link to a student by email
 GET  /api/parent/student/<student_id>/expenses      – view linked student's expenses
 GET  /api/parent/children/<student_id>/weekly       – last 7 days vs the 7 before
+GET  /api/parent/children/<student_id>/goals        – the student's savings goals and any parent match
+PUT  /api/parent/children/<student_id>/goals/<id>/match  – pledge to match a share of their savings
 """
 
 from flask import Blueprint, request, jsonify
@@ -169,6 +171,65 @@ def child_weekly(student_id):
     for k in ('biggest_expense', 'upcoming_renewals'):
         d.pop(k, None)
     return jsonify(d), 200
+
+
+def _linked_student(student_id):
+    student = User.query.filter_by(id=student_id, role='student').first()
+    if student is None:
+        return None, (jsonify({'error': 'Student not found'}), 404)
+    if student.parent_id != int(get_jwt_identity()):
+        return None, (jsonify({'error': 'You are not linked to this student'}), 403)
+    if student.consent_status != 'granted':
+        return None, (jsonify({'error': 'This student account is not active yet'}), 409)
+    return student, None
+
+
+def _goal_out(g):
+    return {'id': g.id, 'name': g.name, 'target_amount': g.target_amount, 'saved_amount': g.saved_amount,
+            'match_percent': g.match_percent or 0, 'match_cap': g.match_cap, 'matched_amount': g.matched_amount or 0.0}
+
+
+@parent_bp.route('/parent/children/<int:student_id>/goals', methods=['GET'])
+@jwt_required()
+@parent_required
+def child_goals(student_id):
+    from models import Goal
+    student, err = _linked_student(student_id)
+    if err:
+        return err
+    goals = Goal.query.filter_by(user_id=student_id).order_by(Goal.id.desc()).all()
+    return jsonify({'goals': [_goal_out(g) for g in goals]}), 200
+
+
+@parent_bp.route('/parent/children/<int:student_id>/goals/<int:goal_id>/match', methods=['PUT'])
+@jwt_required()
+@parent_required
+def set_goal_match(student_id, goal_id):
+    """Pledge to match a share of what the student saves toward a goal. A pledge, not a payment."""
+    from models import Goal
+    student, err = _linked_student(student_id)
+    if err:
+        return err
+    goal = Goal.query.filter_by(id=goal_id, user_id=student_id).first()
+    if goal is None:
+        return jsonify({'error': 'Goal not found'}), 404
+    data = request.get_json(silent=True) or {}
+    pct = data.get('percent')
+    if isinstance(pct, bool) or not isinstance(pct, int) or not (0 <= pct <= 100):
+        return jsonify({'error': 'percent must be a whole number from 0 to 100'}), 400
+    cap = data.get('cap')
+    if cap is not None and (isinstance(cap, bool) or not isinstance(cap, (int, float)) or not (0 < cap <= 10_000_000)):
+        return jsonify({'error': 'cap must be a number above 0, or empty for no cap'}), 400
+    goal.match_percent = pct
+    goal.match_cap = float(cap) if cap is not None and pct else None
+    if goal.match_cap is not None:
+        goal.matched_amount = min(goal.matched_amount or 0.0, goal.match_cap)
+    db.session.commit()
+    if pct:
+        send_email(student.email, 'Your parent will match your savings',
+                   f'Your parent will add {pct}% on top of what you save toward "{goal.name}"'
+                   + (f', up to Rs {goal.match_cap:,.0f}' if goal.match_cap else '') + '. Keep saving on SaverAI.')
+    return jsonify(_goal_out(goal)), 200
 
 
 # ─────────────────────────────────────────────────────────────────────────────
