@@ -14,6 +14,8 @@ export const expensesApi = {
     return response.data;
   },
   importStatement: async (src: { csv?: string; pdf_base64?: string }, commit: boolean) => (await api.post('/expenses/import', { ...src, commit })).data,
+  scanReceipt: async (image_base64: string): Promise<{ merchant: string | null; amount: number | null; date: string | null; category: string | null }> =>
+    (await api.post('/expenses/receipt', { image_base64 })).data,
   update: async ({ id, data }: { id: number; data: any }) => (await api.put(`/expenses/${id}`, data)).data,
   delete: async (id: number) => {
     const response = await api.delete(`/expenses/${id}`);

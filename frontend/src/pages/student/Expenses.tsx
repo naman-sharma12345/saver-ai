@@ -8,7 +8,8 @@ import { Modal } from '../../components/ui/Modal';
 import { formatCurrency } from '../../utils/formatters';
 import { format, isToday, isYesterday } from 'date-fns';
 import { Loader } from '../../components/ui/Loader';
-import { Plus, Trash2, MapPin, Receipt, Search, Sparkles } from 'lucide-react';
+import { Plus, Trash2, MapPin, Receipt, Search, Sparkles, Camera } from 'lucide-react';
+import { expensesApi } from '../../api/expenses';
 import toast from 'react-hot-toast';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -20,6 +21,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 export const Expenses = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [scanning, setScanning] = useState(false);
 
   const { data, isLoading } = useExpenses();
   const deleteMutation = useDeleteExpense();
@@ -30,6 +32,29 @@ export const Expenses = () => {
 
   const handleDelete = (id: number) => {
     if (window.confirm('Delete this expense?')) deleteMutation.mutate(id);
+  };
+
+  const handleScan = async (file?: File) => {
+    if (!file) return;
+    setScanning(true);
+    try {
+      const dataUrl: string = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = rej; r.readAsDataURL(file); });
+      const r = await expensesApi.scanReceipt(dataUrl.split(',')[1] || '');
+      const today = new Date().toISOString().slice(0, 10);
+      setFormData((f) => ({
+        ...f,
+        amount: r.amount != null ? String(r.amount) : f.amount,
+        description: r.merchant || f.description,
+        store_name: r.merchant || f.store_name,
+        category: r.category || f.category,
+        date: r.date && r.date <= today ? r.date : f.date,
+      }));
+      toast.success('Read your receipt. Check the details before saving.');
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || 'Could not read that receipt');
+    } finally {
+      setScanning(false);
+    }
   };
 
   const handleAddSubmit = (e: React.FormEvent) => {
@@ -150,6 +175,11 @@ export const Expenses = () => {
       {/* Add Modal */}
       <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="New Expense" subtitle="AI will auto-categorize if you leave category blank">
         <form onSubmit={handleAddSubmit} className="space-y-4">
+          <label className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-black/20 py-3 text-[14px] text-ink-2 cursor-pointer hover:bg-black/[0.03]">
+            <Camera size={16} /> {scanning ? 'Reading receipt...' : 'Scan a receipt (photo)'}
+            <input type="file" accept="image/*" capture="environment" className="sr-only" aria-label="Scan a receipt photo" disabled={scanning}
+              onChange={(e) => { handleScan(e.target.files?.[0]); e.target.value = ''; }} />
+          </label>
           <Input label="Amount (₹)" type="number" placeholder="0.00" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required autoFocus />
           <Input label="Description" placeholder="e.g. Lunch at canteen" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required />
           <Input label="Store" placeholder="e.g. Amul Canteen" value={formData.store_name} onChange={(e) => setFormData({ ...formData, store_name: e.target.value })} required icon={<MapPin size={14} />} />
