@@ -105,6 +105,8 @@ def create_app(config_name=None):
     app.register_blueprint(onboarding_bp, url_prefix='/api')
     app.register_blueprint(receipts_bp, url_prefix='/api')
     app.register_blueprint(requests_bp, url_prefix='/api')
+    from routes.streak import streak_bp
+    app.register_blueprint(streak_bp, url_prefix='/api')
 
     # ── APScheduler – daily recommendation generation ────────────────────
     try:
