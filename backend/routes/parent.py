@@ -2,6 +2,7 @@
 Parent routes – linking and viewing student data.
 POST /api/parent/link                              – link to a student by email
 GET  /api/parent/student/<student_id>/expenses      – view linked student's expenses
+GET  /api/parent/children/<student_id>/weekly       – last 7 days vs the 7 before
 """
 
 from flask import Blueprint, request, jsonify
@@ -104,6 +105,70 @@ def get_student_expenses(student_id):
         'expenses': [e.to_dict() for e in expenses],
         'total': len(expenses),
     }), 200
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GET /api/parent/children  and  /api/parent/children/<student_id>/summary
+# ─────────────────────────────────────────────────────────────────────────────
+@parent_bp.route('/parent/children', methods=['GET'])
+@jwt_required()
+@parent_required
+def list_children():
+    parent_id = int(get_jwt_identity())
+    kids = User.query.filter_by(parent_id=parent_id, role='student').order_by(User.name).all()
+    return jsonify({'children': [{'id': k.id, 'name': k.name or k.email, 'email': k.email} for k in kids]}), 200
+
+
+@parent_bp.route('/parent/children/<int:student_id>/summary', methods=['GET'])
+@jwt_required()
+@parent_required
+def child_summary(student_id):
+    """This month's spend, allowance, health score and a count of unusual expenses."""
+    from ml.health_score import compute_financial_health
+    from ml.anomaly_detection import detect_anomalies
+    parent_id = int(get_jwt_identity())
+    student = User.query.filter_by(id=student_id, role='student').first()
+    if student is None:
+        return jsonify({'error': 'Student not found'}), 404
+    if student.parent_id != parent_id:
+        return jsonify({'error': 'You are not linked to this student'}), 403
+    if student.consent_status != 'granted':
+        return jsonify({'error': 'This student account is not active yet'}), 409
+    health = compute_financial_health(student_id)
+    return jsonify({
+        'total_spent': round(health.get('total_spending', 0.0), 2),
+        'allowance': student.monthly_allowance or 0,
+        'health_score': health.get('score', 0),
+        'recent_anomalies': len(detect_anomalies(student_id)),
+    }), 200
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GET /api/parent/children/<student_id>/weekly
+# ─────────────────────────────────────────────────────────────────────────────
+@parent_bp.route('/parent/children/<int:student_id>/weekly', methods=['GET'])
+@jwt_required()
+@parent_required
+def child_weekly(student_id):
+    """The linked student's last 7 days vs the 7 before: totals, change, top category, daily bars.
+
+    Deliberately leaves out the biggest single purchase and subscription names;
+    a parent sees the shape of the week, not a line-by-line feed.
+    """
+    from ml.digest import build_digest
+    parent_id = int(get_jwt_identity())
+    student = User.query.filter_by(id=student_id, role='student').first()
+    if student is None:
+        return jsonify({'error': 'Student not found'}), 404
+    if student.parent_id != parent_id:
+        return jsonify({'error': 'You are not linked to this student'}), 403
+    if student.consent_status != 'granted':
+        return jsonify({'error': 'This student account is not active yet'}), 409
+    d = build_digest(Expense.query.filter_by(user_id=student_id).all(), [])
+    d['headline'] = d['headline'].replace('You spent', f'{student.name.split()[0] if student.name else "They"} spent')
+    for k in ('biggest_expense', 'upcoming_renewals'):
+        d.pop(k, None)
+    return jsonify(d), 200
 
 
 # ─────────────────────────────────────────────────────────────────────────────
