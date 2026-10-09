@@ -136,6 +136,16 @@ def create_app(config_name=None):
             id='daily_recommendations',
             replace_existing=True,
         )
+        def _weekly_parent_emails():
+            with app.app_context():
+                from utils.weekly_email import send_weekly_parent_emails
+                try:
+                    app.logger.info("Weekly parent emails: %d sent.", send_weekly_parent_emails())
+                except Exception as exc:
+                    app.logger.error("Weekly parent emails failed: %s", exc)
+
+        scheduler.add_job(func=_weekly_parent_emails, trigger='cron', day_of_week='sun', hour=18, minute=0,
+                          id='weekly_parent_emails', replace_existing=True)
         scheduler.start()
         atexit.register(lambda: scheduler.shutdown(wait=False))
         app.logger.info("✅ APScheduler started — daily recommendations at midnight.")
