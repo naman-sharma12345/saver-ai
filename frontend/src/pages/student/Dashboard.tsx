@@ -15,6 +15,7 @@ import {
 import { formatCurrency } from '../../utils/formatters';
 import { GetStarted } from '../../components/GetStarted';
 import { StreakCard } from '../../components/StreakCard';
+import { InviteCard } from '../../components/InviteCard';
 import { Loader } from '../../components/ui/Loader';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
@@ -72,6 +73,7 @@ export const Dashboard = () => {
 
       <motion.div {...fadeUp(0.04)}><GetStarted /></motion.div>
       <motion.div {...fadeUp(0.05)}><StreakCard /></motion.div>
+      <motion.div {...fadeUp(0.055)}><InviteCard /></motion.div>
 
       {/* Hero */}
       <motion.div {...fadeUp(0.08)}>
