@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useChildren, useChildSummary } from '../../hooks/useQueries';
 import { Card } from '../../components/ui/Card';
 import { Loader } from '../../components/ui/Loader';
@@ -10,12 +10,21 @@ import { Users, Bell, CheckCircle, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { parentApi } from '../../api/services';
+import { requestsApi } from '../../api/requests';
 
 export const ParentDashboard = () => {
   const { data: childrenData, isLoading: lC } = useChildren();
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const { data: summary, isLoading: lS } = useChildSummary(selectedChildId || 0);
   const { data: weekly } = useQuery({ queryKey: ['child-weekly', selectedChildId], queryFn: () => parentApi.weekly(selectedChildId as number), enabled: !!selectedChildId });
+  const qc = useQueryClient();
+  const { data: reqs } = useQuery({ queryKey: ['requests'], queryFn: requestsApi.list });
+  const decide = useMutation({
+    mutationFn: ({ id, d }: { id: number; d: 'approve' | 'decline' }) => requestsApi.decide(id, d),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['requests'] }); toast.success('Answer sent'); },
+    onError: (e: any) => toast.error(e?.response?.data?.error || 'Could not send the answer'),
+  });
+  const pendingReqs = (reqs?.requests ?? []).filter((r) => r.status === 'pending');
   const [note, setNote] = useState('');
   const [sending, setSending] = useState(false);
   const sendReminder = async () => {
@@ -36,6 +45,23 @@ export const ParentDashboard = () => {
         <p className="eyebrow">Parent overview</p>
         <h1 className="display-title mt-2">Your students</h1>
       </div>
+
+      {pendingReqs.length > 0 && (
+        <Card className="p-6">
+          <p className="eyebrow">Waiting for you</p>
+          <div className="mt-3 divide-y divide-black/[0.07]">
+            {pendingReqs.map((r) => (
+              <div key={r.id} className="py-3 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-[16px] text-ink"><span className="font-semibold">{r.student_name}</span> asks for {formatCurrency(r.amount)} <span className="text-ink-2">· {r.reason}</span></p>
+                <div className="flex gap-2">
+                  <Button variant="secondary" onClick={() => decide.mutate({ id: r.id, d: 'decline' })} disabled={decide.isPending}>Decline</Button>
+                  <Button onClick={() => decide.mutate({ id: r.id, d: 'approve' })} disabled={decide.isPending}>Approve</Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="space-y-3">
