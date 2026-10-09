@@ -13,6 +13,20 @@ Track spending, see how many days your allowance really lasts, and get coached b
 
 ---
 
+## Screenshots
+
+Demo data, local build. Light is the default; dark mode follows the system setting.
+
+| Landing | Dashboard |
+| --- | --- |
+| ![Landing page](docs/screenshots/1-landing.png) | ![Dashboard, light](docs/screenshots/2-dashboard.png) |
+| **Dashboard, dark** | **Weekly digest** |
+| ![Dashboard, dark](docs/screenshots/3-dashboard-dark.png) | ![Weekly digest](docs/screenshots/4-weekly.png) |
+| **What if simulator** | **Parent view** |
+| ![What if](docs/screenshots/5-whatif.png) | ![Parent overview](docs/screenshots/6-parent.png) |
+
+---
+
 ## Why SaverAI
 
 Indian students run a monthly allowance on UPI. Existing apps show *what* you spent in pie charts. They do not tell you the one thing that matters on the 12th of the month: **how many days your money lasts and what is about to go wrong.**
