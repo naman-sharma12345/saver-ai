@@ -31,6 +31,17 @@ export const ParentDashboard = () => {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['child-goals'] }); toast.success('Match saved'); },
     onError: (e: any) => toast.error(e?.response?.data?.error || 'Could not save the match'),
   });
+  const { data: weeklyOn } = useQuery({ queryKey: ['weekly-email'], queryFn: parentApi.weeklyEmail });
+  const toggleWeekly = useMutation({
+    mutationFn: (on: boolean) => parentApi.setWeeklyEmail(on),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['weekly-email'] }); },
+    onError: (e: any) => toast.error(e?.response?.data?.error || 'Could not save that'),
+  });
+  const preview = useMutation({
+    mutationFn: parentApi.weeklyPreview,
+    onSuccess: (r) => toast.success(r.message),
+    onError: (e: any) => toast.error(e?.response?.data?.error || 'Could not send the preview'),
+  });
   const pendingReqs = (reqs?.requests ?? []).filter((r) => r.status === 'pending');
   const [note, setNote] = useState('');
   const [sending, setSending] = useState(false);
@@ -66,6 +77,22 @@ export const ParentDashboard = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </Card>
+      )}
+
+      {children.length > 0 && (
+        <Card className="p-6 flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-[16px] font-semibold text-ink">Sunday summary by email</p>
+            <p className="text-[14px] text-ink-2 mt-1">One short email a week with how each student did. The shape of the week, not a list of purchases.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" onClick={() => preview.mutate()} isLoading={preview.isPending}>Send me a preview</Button>
+            <label className="flex items-center gap-2 text-[14px] text-ink cursor-pointer">
+              <input type="checkbox" className="w-5 h-5 accent-[#0071e3]" checked={!!weeklyOn} onChange={(e) => toggleWeekly.mutate(e.target.checked)} aria-label="Email me a weekly summary" />
+              {weeklyOn ? 'On' : 'Off'}
+            </label>
           </div>
         </Card>
       )}
