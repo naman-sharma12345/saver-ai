@@ -5,6 +5,8 @@ GET  /api/parent/student/<student_id>/expenses      – view linked student's ex
 GET  /api/parent/children/<student_id>/weekly       – last 7 days vs the 7 before
 GET  /api/parent/children/<student_id>/goals        – the student's savings goals and any parent match
 PUT  /api/parent/children/<student_id>/goals/<id>/match  – pledge to match a share of their savings
+GET/PUT /api/parent/weekly-email                    – opt in or out of the Sunday summary email
+POST /api/parent/weekly-email/preview               – send yourself the summary now
 """
 
 from flask import Blueprint, request, jsonify
@@ -171,6 +173,41 @@ def child_weekly(student_id):
     for k in ('biggest_expense', 'upcoming_renewals'):
         d.pop(k, None)
     return jsonify(d), 200
+
+
+@parent_bp.route('/parent/weekly-email', methods=['GET'])
+@jwt_required()
+@parent_required
+def get_weekly_email():
+    user = User.query.get(int(get_jwt_identity()))
+    return jsonify({'enabled': bool(user.weekly_email)}), 200
+
+
+@parent_bp.route('/parent/weekly-email', methods=['PUT'])
+@jwt_required()
+@parent_required
+def set_weekly_email():
+    data = request.get_json(silent=True) or {}
+    if not isinstance(data.get('enabled'), bool):
+        return jsonify({'error': 'enabled must be true or false'}), 400
+    user = User.query.get(int(get_jwt_identity()))
+    user.weekly_email = data['enabled']
+    db.session.commit()
+    return jsonify({'enabled': user.weekly_email}), 200
+
+
+@parent_bp.route('/parent/weekly-email/preview', methods=['POST'])
+@jwt_required()
+@parent_required
+@rate_limit('weekly-preview', 5, 3600)
+def weekly_email_preview():
+    from utils.weekly_email import compose
+    user = User.query.get(int(get_jwt_identity()))
+    msg = compose(user)
+    if msg is None:
+        return jsonify({'error': 'No active linked students yet'}), 409
+    sent = send_email(user.email, '[Preview] ' + msg[0], msg[1])
+    return jsonify({'message': 'Preview sent to %s' % user.email if sent else 'Preview created. Email is not set up on this server yet, so it was only logged.', 'sent': bool(sent)}), 200
 
 
 def _linked_student(student_id):
