@@ -22,6 +22,7 @@ SaverAI is built around that moment.
 - **Allowance runway.** "You have Rs 12,000 left, about Rs 522 a day for the next 23 days."
 - **Parent check-ins.** Parents can send a linked student a friendly allowance reminder by email (one per child every 6 hours, optional note).
 - **Weekly digest.** Last 7 days against the 7 before: total, change, a bar per day, top category, biggest spend, no-spend days, and a logging streak. Free for everyone; which subscriptions renew this week is Pro.
+- **Receipt scanning (backend prototype).** `POST /api/expenses/receipt` reads a receipt photo with local Tesseract OCR, finds merchant, total and date, and suggests a category. Nothing is saved and no external API is used. Needs `tesseract-ocr` on the server; accuracy on real photos is unmeasured. See `docs/RECEIPT_SCANNING.md`.
 - **Get started checklist.** New users see a four-step card on the dashboard (allowance, first expense, budget, goal) that ticks off as they do each thing and disappears when done. `GET /api/onboarding`.
 - **Upcoming bills.** `GET /api/subscriptions/upcoming` lists detected recurring charges due in the next 14 days (up to 60), shown on the Subscriptions page. Free sees the count and total, Pro sees which ones.
 - **Budget pace.** Each budget shows where it will land by month end and the daily spend that keeps you inside. Free for everyone.
@@ -130,6 +131,7 @@ Merged and tested is not the same as ready for real users. Before launch:
 - [ ] Real Razorpay keys, a live webhook, and a test payment end to end
 - [ ] Run the migrations and the app against PostgreSQL and fix anything SQLite hid
 - [ ] Rate limits live in process memory. Behind several workers or servers they need a shared store such as Redis
+- [ ] Receipt scanning needs the `tesseract-ocr` package in the backend image (not yet in Docker), and real-photo accuracy has not been measured
 - [x] Daily scheduler starts in one process only (file lock, so gunicorn workers do not each run it)
 - [ ] Rotate the secrets that were committed earlier (old JWT secret and AI key remain in git history)
 - [ ] Change or delete the demo logins
